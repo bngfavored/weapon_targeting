@@ -413,7 +413,7 @@
 
         .card-content.expanded {
             max-height: 500px;
-            padding-top: 10px;
+            padding-top: 6px;
         }
 
         /* Gauge Section - Mobile Stack */
@@ -429,8 +429,12 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 8px 0;
+            padding: 4px 0;
             border-bottom: 1px solid var(--border-color);
+        }
+
+        .lever-row:first-child {
+            padding-top: 0;
         }
 
         .lever-row:last-child {
@@ -448,7 +452,7 @@
             background: var(--bg-secondary);
             border: 1px solid var(--border-color);
             border-radius: var(--radius-sm);
-            padding: 10px;
+            padding: 6px 8px;
             color: var(--text-primary);
             font-family: 'Space Mono', monospace;
             font-size: 13px;
@@ -692,10 +696,10 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 10px;
+            padding: 6px 8px;
             background: var(--bg-secondary);
             border-radius: var(--radius-sm);
-            margin-top: 8px;
+            margin-top: 6px;
         }
 
         .loc-label {
@@ -880,8 +884,8 @@
             }
 
             .card-content {
-                max-height: 500px;
-                padding-top: 10px;
+                max-height: 400px;
+                padding-top: 6px;
             }
 
             .expand-icon {
@@ -893,19 +897,34 @@
             }
         }
 
-        /* ========== TABLET STYLES (min-width: 480px) ========== */
-        @media (min-width: 480px) {
+        /* ========== SIDE-BY-SIDE LAYOUT (min-width: 400px) ========== */
+        @media (min-width: 400px) {
             .container {
                 padding: 12px;
             }
 
             .gauge-section {
                 flex-direction: row;
+                gap: 8px;
             }
 
             .gauge-section > .card {
                 flex: 1;
                 margin-bottom: 0;
+            }
+
+            /* Auto-expand CFO Levers when side-by-side */
+            .card-content {
+                max-height: 500px;
+                padding-top: 6px;
+            }
+
+            .expand-icon {
+                display: none;
+            }
+
+            .card-header-collapsible {
+                cursor: default;
             }
 
             .gauge-wrapper {
@@ -977,8 +996,8 @@
 
             /* Auto-expand CFO Levers on desktop */
             .card-content {
-                max-height: 500px;
-                padding-top: 10px;
+                max-height: 400px;
+                padding-top: 6px;
             }
 
             .expand-icon {
