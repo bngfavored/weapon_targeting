@@ -513,6 +513,39 @@ document.addEventListener('DOMContentLoaded', function() {
     initChart();
     updateGauge(91.1);
 
+    // Theme toggle functionality
+    const themeToggle = document.getElementById('themeToggle');
+    const themeToggleSlider = themeToggle?.querySelector('.theme-toggle-slider');
+    const htmlElement = document.documentElement;
+
+    // Set initial theme (default to light mode)
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    if (savedTheme === 'dark') {
+        htmlElement.setAttribute('data-theme', 'dark');
+        themeToggle?.classList.add('active');
+        if (themeToggleSlider) themeToggleSlider.textContent = '🌙';
+    }
+
+    if (themeToggle) {
+        themeToggle.addEventListener('click', function() {
+            const isDark = htmlElement.getAttribute('data-theme') === 'dark';
+
+            if (isDark) {
+                // Switch to light mode
+                htmlElement.removeAttribute('data-theme');
+                themeToggle.classList.remove('active');
+                if (themeToggleSlider) themeToggleSlider.textContent = '☀️';
+                localStorage.setItem('theme', 'light');
+            } else {
+                // Switch to dark mode
+                htmlElement.setAttribute('data-theme', 'dark');
+                themeToggle.classList.add('active');
+                if (themeToggleSlider) themeToggleSlider.textContent = '🌙';
+                localStorage.setItem('theme', 'dark');
+            }
+        });
+    }
+
     // Settings menu toggle
     const settingsBtn = document.getElementById('settingsBtn');
     const settingsDropdown = document.getElementById('settingsDropdown');
