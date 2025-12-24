@@ -950,17 +950,15 @@
             }
 
             .gauge-section {
-                flex-direction: column;
+                display: grid;
+                grid-template-rows: auto auto;
+                grid-template-columns: 1fr;
+                gap: 16px;
+                margin-bottom: 12px;
             }
 
             .gauge-section > .card {
                 margin-bottom: 0;
-            }
-
-            .gauge-section {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 12px;
             }
 
             .gauge-wrapper {
