@@ -76,22 +76,100 @@
         /* Header - Mobile First */
         .header {
             display: flex;
-            flex-direction: column;
-            gap: 12px;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 16px;
             padding-bottom: 12px;
             border-bottom: 1px solid var(--border-color);
         }
 
         .header-controls-mobile {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            width: 100%;
+            display: none;
         }
 
         .header-controls-desktop {
             display: none;
+        }
+
+        /* Settings Menu */
+        .settings-menu-wrapper {
+            position: relative;
+        }
+
+        .settings-btn {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            padding: 10px 16px;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .settings-btn:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--border-color-hover);
+        }
+
+        .settings-btn:active {
+            transform: scale(0.98);
+        }
+
+        .settings-icon {
+            font-size: 18px;
+        }
+
+        .settings-dropdown {
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            min-width: 320px;
+            box-shadow: var(--shadow-md);
+            z-index: 1000;
+            display: none;
+        }
+
+        .settings-dropdown.active {
+            display: block;
+            animation: slideDown 0.2s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .settings-section {
+            margin-bottom: 16px;
+        }
+
+        .settings-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .settings-section-title {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--text-muted);
+            margin-bottom: 10px;
         }
 
         .logo {
@@ -144,9 +222,6 @@
             width: 100%;
         }
 
-        .chart-header-controls {
-            display: none; /* Hidden on mobile */
-        }
 
         .controls-row {
             display: flex;
@@ -218,6 +293,35 @@
             text-transform: uppercase;
             letter-spacing: 0.8px;
             color: var(--text-secondary);
+        }
+
+        /* Collapsible Card */
+        .card-header-collapsible {
+            cursor: pointer;
+            user-select: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .expand-icon {
+            font-size: 18px;
+            color: var(--text-muted);
+            transition: transform 0.3s ease;
+        }
+
+        .expand-icon.expanded {
+            transform: rotate(45deg);
+        }
+
+        .card-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .card-content.expanded {
+            max-height: 500px;
         }
 
         /* Gauge Section - Mobile Stack */
@@ -540,16 +644,18 @@
 
         .control-group {
             display: flex;
-            align-items: center;
+            flex-direction: column;
             gap: 8px;
             flex: 1;
             min-width: 120px;
         }
 
         .control-label {
-            font-size: 12px;
-            color: var(--text-secondary);
-            white-space: nowrap;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
         }
 
         .number-input {
@@ -675,43 +781,6 @@
                 display: none;
             }
 
-            .header-controls-desktop {
-                display: flex;
-                flex-direction: row;
-                gap: 20px;
-                align-items: center;
-            }
-
-            .period-selector {
-                width: auto;
-                flex: initial;
-            }
-
-            .calculation-engine-wrapper {
-                width: auto;
-            }
-
-            .chart-header-controls {
-                display: flex;
-                flex-direction: column;
-                gap: 16px;
-                margin-bottom: 16px;
-                padding: 16px;
-                background: var(--bg-secondary);
-                border-radius: var(--radius-md);
-            }
-
-            .controls-row {
-                flex-direction: row;
-                gap: 20px;
-                align-items: center;
-            }
-
-            .select-wrapper {
-                flex: none;
-                width: 140px;
-            }
-
             .logo-icon {
                 width: 48px;
                 height: 48px;
@@ -822,34 +891,43 @@
             <div class="logo">
                 <img src="logo.png" alt="Company Logo" style="height: 60px; width: auto;">
             </div>
-            <!-- Mobile: Show controls in header -->
-            <div class="header-controls-mobile">
-                <div class="period-selector">
-                    <span class="period-label">Select Period:</span>
-                    <div class="select-wrapper">
-                        <select id="periodSelect">
-                            <option value="1">Month 1</option>
-                            <option value="2">Month 2</option>
-                            <option value="3" selected>Month 3</option>
-                            <option value="4">Month 4</option>
-                            <option value="5">Month 5</option>
-                            <option value="6">Month 6</option>
-                        </select>
+
+            <!-- Settings Menu -->
+            <div class="settings-menu-wrapper">
+                <button class="settings-btn" id="settingsBtn">
+                    <span class="settings-icon">⚙</span>
+                    <span>Settings</span>
+                </button>
+
+                <div class="settings-dropdown" id="settingsDropdown">
+                    <div class="settings-section">
+                        <div class="settings-section-title">Select Period</div>
+                        <div class="select-wrapper">
+                            <select id="periodSelect">
+                                <option value="1">Month 1</option>
+                                <option value="2">Month 2</option>
+                                <option value="3" selected>Month 3</option>
+                                <option value="4">Month 4</option>
+                                <option value="5">Month 5</option>
+                                <option value="6">Month 6</option>
+                            </select>
+                        </div>
                     </div>
-                </div>
-                <div class="calculation-engine-wrapper">
-                    <span class="period-label">Calculation Engine:</span>
-                    <div class="forecast-toggle">
-                        <label class="toggle-option active" id="toggleSubmitted">
-                            <input type="radio" name="forecast" value="submitted" checked>
-                            <span class="radio-custom"></span>
-                            <span class="toggle-label">Submitted Forecast</span>
-                        </label>
-                        <label class="toggle-option" id="toggleChanceplan">
-                            <input type="radio" name="forecast" value="chanceplan">
-                            <span class="radio-custom"></span>
-                            <span class="toggle-label">ChancePlan Forecast</span>
-                        </label>
+
+                    <div class="settings-section">
+                        <div class="settings-section-title">Calculation Engine</div>
+                        <div class="forecast-toggle">
+                            <label class="toggle-option active" id="toggleSubmitted">
+                                <input type="radio" name="forecast" value="submitted" checked>
+                                <span class="radio-custom"></span>
+                                <span class="toggle-label">Submitted Forecast</span>
+                            </label>
+                            <label class="toggle-option" id="toggleChanceplan">
+                                <input type="radio" name="forecast" value="chanceplan">
+                                <span class="radio-custom"></span>
+                                <span class="toggle-label">ChancePlan Forecast</span>
+                            </label>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -862,20 +940,23 @@
                 <!-- CFO Levers & Gauge -->
                 <div class="gauge-section">
                     <div class="card">
-                        <div class="card-header">
+                        <div class="card-header card-header-collapsible" id="cfoLeversHeader">
                             <span class="card-title">CFO Levers</span>
+                            <span class="expand-icon">+</span>
                         </div>
-                        <div class="lever-row">
-                            <span class="lever-label">Cut OpEx</span>
-                            <input type="text" class="lever-input" value="$0" id="cutOpex">
-                        </div>
-                        <div class="lever-row">
-                            <span class="lever-label">Collect A/R</span>
-                            <input type="text" class="lever-input" value="$0" id="collectAR">
-                        </div>
-                        <div class="lever-row">
-                            <span class="lever-label">Increase LOC</span>
-                            <input type="text" class="lever-input" value="$0" id="increaseLOC">
+                        <div class="card-content" id="cfoLeversContent">
+                            <div class="lever-row">
+                                <span class="lever-label">Cut OpEx</span>
+                                <input type="text" class="lever-input" value="$0" id="cutOpex">
+                            </div>
+                            <div class="lever-row">
+                                <span class="lever-label">Collect A/R</span>
+                                <input type="text" class="lever-input" value="$0" id="collectAR">
+                            </div>
+                            <div class="lever-row">
+                                <span class="lever-label">Increase LOC</span>
+                                <input type="text" class="lever-input" value="$0" id="increaseLOC">
+                            </div>
                         </div>
                     </div>
 
@@ -1029,47 +1110,13 @@
 
             <!-- Right Column -->
             <div class="right-column">
-                <!-- Desktop: Show controls above chart -->
-                <div class="header-controls-desktop chart-header-controls">
-                    <div class="controls-row">
-                        <div class="period-selector">
-                            <span class="period-label">Select Period:</span>
-                            <div class="select-wrapper">
-                                <select id="periodSelect2">
-                                    <option value="1">Month 1</option>
-                                    <option value="2">Month 2</option>
-                                    <option value="3" selected>Month 3</option>
-                                    <option value="4">Month 4</option>
-                                    <option value="5">Month 5</option>
-                                    <option value="6">Month 6</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="calculation-engine-wrapper">
-                            <span class="period-label">Calculation Engine:</span>
-                            <div class="forecast-toggle">
-                                <label class="toggle-option active" id="toggleSubmitted2">
-                                    <input type="radio" name="forecast2" value="submitted" checked>
-                                    <span class="radio-custom"></span>
-                                    <span class="toggle-label">Submitted Forecast</span>
-                                </label>
-                                <label class="toggle-option" id="toggleChanceplan2">
-                                    <input type="radio" name="forecast2" value="chanceplan">
-                                    <span class="radio-custom"></span>
-                                    <span class="toggle-label">ChancePlan Forecast</span>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- Chart -->
                 <div class="card">
                     <div class="card-header">
                         <span class="card-title" id="chartTitle">Ending Cash Paths</span>
                         <div class="chart-controls">
                             <div class="control-group">
-                                <span class="control-label">Start Trial</span>
+                                <span class="control-label">Starting Trial</span>
                                 <div class="number-input">
                                     <input type="number" id="startTrial" value="33" min="1">
                                     <div class="number-btn">
@@ -1079,7 +1126,7 @@
                                 </div>
                             </div>
                             <div class="control-group">
-                                <span class="control-label">Number Trial Paths</span>
+                                <span class="control-label">Number of Trial Paths</span>
                                 <div class="number-input">
                                     <input type="number" id="numCurves" value="10" min="1" max="50">
                                     <div class="number-btn">

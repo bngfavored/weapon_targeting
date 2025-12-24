@@ -478,29 +478,21 @@ document.querySelectorAll('.toggle-option').forEach(option => {
     });
 });
 
-// Sync both period selects
+// Period select handler
 function handlePeriodChange(value) {
-    const gaugeValues = { '1': 98.5, '2': 95.2, '3': 91.1, '4': 85.3, '5': 78.9, '6': 72.4 };
-    updateGauge(gaugeValues[value] || 91.1);
-
-    // Sync both selects
-    document.getElementById('periodSelect').value = value;
-    const periodSelect2 = document.getElementById('periodSelect2');
-    if (periodSelect2) {
-        periodSelect2.value = value;
+    // Recalculate with new selected month
+    if (cfoData) {
+        updateDashboard();
+    } else {
+        // Fallback to hardcoded values if data not loaded yet
+        const gaugeValues = { '1': 98.5, '2': 95.2, '3': 91.1, '4': 85.3, '5': 78.9, '6': 72.4 };
+        updateGauge(gaugeValues[value] || 91.1);
     }
 }
 
 document.getElementById('periodSelect').addEventListener('change', function() {
     handlePeriodChange(this.value);
 });
-
-const periodSelect2 = document.getElementById('periodSelect2');
-if (periodSelect2) {
-    periodSelect2.addEventListener('change', function() {
-        handlePeriodChange(this.value);
-    });
-}
 
 // Update LOC Limit based on Increase LOC input
 function updateLOCLimit() {
@@ -521,15 +513,78 @@ document.addEventListener('DOMContentLoaded', function() {
     initChart();
     updateGauge(91.1);
 
+    // Settings menu toggle
+    const settingsBtn = document.getElementById('settingsBtn');
+    const settingsDropdown = document.getElementById('settingsDropdown');
+
+    if (settingsBtn && settingsDropdown) {
+        settingsBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            settingsDropdown.classList.toggle('active');
+        });
+
+        // Close menu when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!settingsDropdown.contains(e.target) && e.target !== settingsBtn) {
+                settingsDropdown.classList.remove('active');
+            }
+        });
+
+        // Prevent menu from closing when clicking inside
+        settingsDropdown.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+    }
+
+    // CFO Levers collapse/expand toggle
+    const cfoLeversHeader = document.getElementById('cfoLeversHeader');
+    const cfoLeversContent = document.getElementById('cfoLeversContent');
+    const expandIcon = cfoLeversHeader?.querySelector('.expand-icon');
+
+    if (cfoLeversHeader && cfoLeversContent && expandIcon) {
+        cfoLeversHeader.addEventListener('click', function() {
+            cfoLeversContent.classList.toggle('expanded');
+            expandIcon.classList.toggle('expanded');
+
+            // Change icon from + to ×
+            if (expandIcon.classList.contains('expanded')) {
+                expandIcon.textContent = '×';
+            } else {
+                expandIcon.textContent = '+';
+            }
+        });
+    }
+
     // Listen for changes on Increase LOC input
     const increaseLOCInput = document.getElementById('increaseLOC');
     if (increaseLOCInput) {
-        increaseLOCInput.addEventListener('input', updateLOCLimit);
-        increaseLOCInput.addEventListener('change', updateLOCLimit);
+        increaseLOCInput.addEventListener('input', function() {
+            increaseLOCValue = parseFloat(this.value.replace(/[$,]/g, '')) || 0;
+            updateLOCLimit();
+            updateDashboard(); // Recalculate with new LOC limit
+        });
+        increaseLOCInput.addEventListener('change', function() {
+            increaseLOCValue = parseFloat(this.value.replace(/[$,]/g, '')) || 0;
+            updateLOCLimit();
+        });
     }
+
+    // Listen for CFO Lever changes
+    document.getElementById('cutOpex')?.addEventListener('change', function(e) {
+        cutOpExValue = parseFloat(e.target.value.replace(/[$,]/g, '')) || 0;
+        updateDashboard();
+    });
+
+    document.getElementById('collectAR')?.addEventListener('change', function(e) {
+        collectARValue = parseFloat(e.target.value.replace(/[$,]/g, '')) || 0;
+        updateDashboard();
+    });
 
     // Initialize LOC Limit display
     updateLOCLimit();
+
+    // Process CFO SIPmath data on page load
+    processCFOData();
 });
 
 // Handle resize for chart
@@ -538,6 +593,22 @@ window.addEventListener('resize', function() {
         chart.resize();
     }
 });
+
+// === Global Variables for CFO Dashboard ===
+let cfoData = null; // Stores the loaded SIPmath data
+let correlationMatrixData = null; // Stores correlation matrix if present
+let numSips = 0; // Number of SIPs in the model
+let rngParamsArray = []; // Stores RNG parameters for each SIP
+const maxTrials = 10000; // Number of Monte Carlo trials to run
+
+// CFO Lever values (user inputs)
+let cutOpExValue = 0;
+let collectARValue = 0;
+let increaseLOCValue = 0;
+
+// Starting conditions
+const startingCash = 50; // $50k starting cash
+const baseLOCLimit = 20; // $20k base line of credit
 
 // === Mathematical Helper Functions ===
 
@@ -696,4 +767,540 @@ function metalogCopulaSample(covMatrix, hdrSample, metalogInverseFnArray) {
               return NaN;
          }
     });
+}
+
+// === CFO Data Processing Functions ===
+
+/**
+ * Processes the CFO SIPmath data from cashPathsData.
+ */
+function processCFOData() {
+    try {
+        // Load the first (and only) dataset from cashPathsData
+        cfoData = cashPathsData[0];
+
+        // Reset correlation state
+        correlationMatrixData = null;
+        numSips = 0;
+        rngParamsArray = [];
+
+        const hasCorrelationMatrix = cfoData.globalVariables?.some(
+            gv => gv.name === 'correlationMatrix'
+        );
+        const currentNumSips = cfoData.sips?.length || 0;
+
+        // Setup Correlation Context if present
+        if (hasCorrelationMatrix && currentNumSips > 1) {
+            console.log("Correlation matrix found. Setting up correlation context.");
+            correlationMatrixData = cfoData.globalVariables.find(
+                gv => gv.name === 'correlationMatrix'
+            ).value;
+            numSips = currentNumSips;
+
+            // Prepare RNG params array
+            rngParamsArray = cfoData.sips.map((sip, index) => {
+                let rngArgs = null;
+                try {
+                    // Try to find RNG from copula definition first
+                    const copulaDef = cfoData.U01?.copula?.[0];
+                    const copulaRngName = copulaDef?.arguments?.rng?.[index];
+                    if (copulaRngName) {
+                        rngArgs = cfoData.U01?.rng?.find(
+                            r => r.name === copulaRngName
+                        )?.arguments;
+                    }
+                    // Fallback to direct RNG array
+                    if (!rngArgs) {
+                        rngArgs = cfoData.U01?.rng?.[index]?.arguments;
+                    }
+                } catch (e) {
+                    console.warn("Error finding RNG params for SIP", index, e);
+                }
+
+                if (rngArgs) {
+                    return {
+                        varId: rngArgs.varId,
+                        entity: rngArgs.entity,
+                        seed3: rngArgs.seed3,
+                        seed4: rngArgs.seed4
+                    };
+                } else {
+                    console.warn(`RNG params not found for SIP index ${index}. Using defaults.`);
+                    return { varId: index + 1, entity: 1, seed3: 0, seed4: 0 };
+                }
+            });
+            console.log("Global RNG Parameters prepared:", rngParamsArray);
+        } else {
+            console.log("No correlation matrix found. Using independent calculations.");
+            // Still set up RNG params for independent calculations
+            numSips = currentNumSips;
+            rngParamsArray = cfoData.sips.map((sip, index) => {
+                const rngArgs = cfoData.U01?.rng?.[index]?.arguments;
+                if (rngArgs) {
+                    return {
+                        varId: rngArgs.varId,
+                        entity: rngArgs.entity,
+                        seed3: rngArgs.seed3,
+                        seed4: rngArgs.seed4
+                    };
+                } else {
+                    return { varId: index + 1, entity: 1, seed3: 0, seed4: 0 };
+                }
+            });
+        }
+
+        // Initialize the dashboard with calculated values
+        updateDashboard();
+
+        console.log("CFO SIPmath data loaded successfully");
+
+    } catch (error) {
+        console.error("Error processing CFO SIPmath data:", error);
+        alert("Error loading CFO forecast data: " + error.message);
+    }
+}
+
+/**
+ * Calculates the trial value for a specific SIP and trial number.
+ * Uses correlation if context is active.
+ * @param {object} sip - The SIP object (Rev_01, Rev_02, V_Exp, etc.).
+ * @param {number} trialNum - The specific trial number (1-maxTrials).
+ * @returns {number} The calculated value for the specified trial (in thousands).
+ */
+function calculateTrialValue(sip, trialNum = 1) {
+    let trialValue = NaN;
+
+    // Determine if correlation context is active
+    const useCorrelation = !!(
+        correlationMatrixData &&
+        rngParamsArray &&
+        rngParamsArray.length === numSips &&
+        numSips > 1
+    );
+
+    if (sip.function === "Metalog_1_0") {
+        let aCoeff = [...sip.arguments.aCoefficients];
+        // Pad to 16 coefficients
+        while (aCoeff.length < 16) {
+            aCoeff.push(0);
+        }
+
+        try {
+            let finalUniform = NaN;
+
+            if (useCorrelation && cfoData) {
+                // Correlated Path
+                const sipIndex = cfoData.sips.findIndex(
+                    s => s.name === sip.name
+                );
+
+                if (sipIndex !== -1 && rngParamsArray[sipIndex]) {
+                    // Reconstruct Covariance Matrix
+                    const size = correlationMatrixData.columns.length;
+                    let covMatrix = Array.from(
+                        { length: size },
+                        () => Array(size).fill(0)
+                    );
+                    correlationMatrixData.matrix.forEach(item => {
+                        const rowIndex = correlationMatrixData.rows.indexOf(item.row);
+                        const colIndex = correlationMatrixData.columns.indexOf(item.col);
+                        if (rowIndex !== -1 && colIndex !== -1) {
+                            covMatrix[rowIndex][colIndex] = item.value;
+                        }
+                    });
+
+                    // Generate independent HDR samples for all dimensions
+                    let hdrSampleVector = rngParamsArray.map(params =>
+                        params ? HDRprng(
+                            trialNum,
+                            params.varId,
+                            params.entity,
+                            params.seed3,
+                            params.seed4
+                        ) : Math.random()
+                    );
+
+                    // Generate correlated uniforms using Gaussian Copula
+                    let correlatedUniformsVector = gaussianCopulaSample(
+                        covMatrix,
+                        hdrSampleVector
+                    );
+
+                    // Extract the uniform for the current SIP
+                    finalUniform = correlatedUniformsVector[sipIndex];
+                } else {
+                    console.warn(
+                        `Could not find SIP index or RNG params for ${sip.name}. Falling back.`
+                    );
+                    finalUniform = NaN;
+                }
+            }
+
+            // If correlation failed or wasn't active, calculate independently
+            if (isNaN(finalUniform)) {
+                // Independent Path
+                let rngParams;
+                const sipIndex = cfoData?.sips?.findIndex(
+                    s => s.name === sip.name
+                );
+
+                if (sipIndex !== -1 && rngParamsArray && rngParamsArray[sipIndex]) {
+                    rngParams = rngParamsArray[sipIndex];
+                } else {
+                    // Absolute fallback
+                    try {
+                        rngParams = sip.U01?.rng?.[0]?.arguments;
+                        if (!rngParams) throw new Error("No direct RNG found");
+                    } catch {
+                        console.warn(
+                            `Using default RNG params for independent calc of ${sip.name}`
+                        );
+                        rngParams = {
+                            varId: (sipIndex ?? 0) + 1,
+                            entity: 1,
+                            seed3: 0,
+                            seed4: 0
+                        };
+                    }
+                }
+                finalUniform = HDRprng(
+                    trialNum,
+                    rngParams.varId,
+                    rngParams.entity,
+                    rngParams.seed3,
+                    rngParams.seed4
+                );
+            }
+
+            // Apply Metalog inverse transform (uMQ)
+            trialValue = uMQ(aCoeff, finalUniform);
+
+            // Apply bounds if they exist
+            let lb = sip.arguments.lowerBound;
+            let ub = sip.arguments.upperBound;
+            if (!isNaN(trialValue)) {
+                if (lb !== undefined) {
+                    if (ub === undefined) {
+                        trialValue = lb + Math.exp(trialValue);
+                    } else {
+                        trialValue = lb + ub * Math.exp(trialValue) /
+                                      (1 + Math.exp(trialValue));
+                    }
+                } else if (ub !== undefined) {
+                    trialValue = ub - Math.exp(-trialValue);
+                }
+            }
+
+        } catch (error) {
+            console.error(`Error calculating value for ${sip.name}:`, error);
+            trialValue = uMQ(aCoeff, 0.5); // Fallback to median
+
+            // Apply bounds to fallback
+            let lb = sip.arguments.lowerBound;
+            let ub = sip.arguments.upperBound;
+            if (!isNaN(trialValue)) {
+                if (lb !== undefined) {
+                    if (ub === undefined) {
+                        trialValue = lb + Math.exp(trialValue);
+                    } else {
+                        trialValue = lb + ub * Math.exp(trialValue) /
+                                      (1 + Math.exp(trialValue));
+                    }
+                } else if (ub !== undefined) {
+                    trialValue = ub - Math.exp(-trialValue);
+                }
+            }
+        }
+    } else {
+        console.warn(
+            `Unsupported function type ${sip.function} for ${sip.name}.`
+        );
+        trialValue = NaN;
+    }
+
+    return trialValue;
+}
+
+/**
+ * Maps SIPmath SIP names to business meanings
+ */
+const SIP_MAPPINGS = {
+    'Rev_01': { label: 'Month 1 Revenue', month: 1, type: 'revenue' },
+    'Rev_02': { label: 'Month 2 Revenue', month: 2, type: 'revenue' },
+    'Rev_03': { label: 'Month 3 Revenue', month: 3, type: 'revenue' },
+    'V_Exp': { label: 'Variable Expenses', type: 'expense' },
+    'F_Exp': { label: 'Fixed Expenses', type: 'expense' }
+};
+
+/**
+ * Gets the SIP data for a specific variable by name
+ */
+function getSIPByName(sipName) {
+    if (!cfoData || !cfoData.sips) return null;
+    return cfoData.sips.find(sip => sip.name === sipName);
+}
+
+/**
+ * Calculates the ending cash position for a specific trial and month.
+ * Formula: Cash = Starting Cash + Revenues - OpEx - Debt + CFO Levers
+ * @param {number} trialNum - The trial number (1-maxTrials)
+ * @param {number} month - The month number (1-3)
+ * @returns {object} { endingCash, revenue, opex, debt, cashFlow, startingCash }
+ */
+function calculateTrialCashPosition(trialNum, month) {
+    // Get revenue for this month
+    const revSip = getSIPByName(`Rev_0${month}`);
+    const revenue = revSip ? calculateTrialValue(revSip, trialNum) : 0;
+
+    // Get variable expenses (as percentage of revenue)
+    const vExpSip = getSIPByName('V_Exp');
+    const vExpPct = vExpSip ? calculateTrialValue(vExpSip, trialNum) : 0;
+
+    // Get fixed expenses
+    const fExpSip = getSIPByName('F_Exp');
+    const fixedExp = fExpSip ? calculateTrialValue(fExpSip, trialNum) : 0;
+
+    // Calculate total OpEx
+    const variableExp = revenue * vExpPct;
+    const totalOpEx = variableExp + fixedExp;
+
+    // Apply CFO Levers
+    const opExAfterCuts = totalOpEx - cutOpExValue;
+
+    // Debt payment (only in month 3)
+    const debtPayment = (month === 3) ? 50 : 0;
+
+    // Calculate cash flow for this month
+    const cashFlow = revenue - opExAfterCuts - debtPayment;
+
+    // Get starting cash for this month
+    let startCash = startingCash;
+    if (month > 1) {
+        // Need to calculate cumulative cash from previous months
+        for (let m = 1; m < month; m++) {
+            const prevMonth = calculateTrialCashPosition(trialNum, m);
+            startCash = prevMonth.endingCash;
+        }
+    }
+
+    // Calculate ending cash
+    const endingCash = startCash + cashFlow + collectARValue;
+
+    return {
+        endingCash: endingCash,
+        revenue: revenue,
+        opex: opExAfterCuts,
+        debt: debtPayment,
+        cashFlow: cashFlow,
+        startingCash: startCash
+    };
+}
+
+/**
+ * Runs Monte Carlo simulation for all months
+ * @param {number} selectedMonth - The month to focus analysis on
+ * @returns {object} Simulation results with statistics
+ */
+function runMonteCarloSimulation(selectedMonth) {
+    const results = {
+        month1: { cash: [], lineDraw: [], chanceLOCDraw: 0, chanceCashNegative: 0 },
+        month2: { cash: [], lineDraw: [], chanceLOCDraw: 0, chanceCashNegative: 0 },
+        month3: { cash: [], lineDraw: [], chanceLOCDraw: 0, chanceCashNegative: 0 }
+    };
+
+    // Run trials
+    for (let trial = 1; trial <= maxTrials; trial++) {
+        for (let month = 1; month <= 3; month++) {
+            const position = calculateTrialCashPosition(trial, month);
+
+            // Determine if LOC is needed
+            const locLimit = baseLOCLimit + increaseLOCValue;
+            let lineDraw = 0;
+            let finalCash = position.endingCash;
+
+            if (position.endingCash < 0) {
+                // Need to draw from line of credit
+                lineDraw = Math.min(Math.abs(position.endingCash), locLimit);
+                finalCash = position.endingCash + lineDraw;
+            }
+
+            const monthKey = `month${month}`;
+            results[monthKey].cash.push(finalCash);
+            results[monthKey].lineDraw.push(lineDraw);
+        }
+    }
+
+    // Calculate statistics for each month
+    for (let month = 1; month <= 3; month++) {
+        const monthKey = `month${month}`;
+        const cashArray = results[monthKey].cash;
+        const lineDrawArray = results[monthKey].lineDraw;
+
+        // Calculate averages
+        results[monthKey].avgCash = cashArray.reduce((a, b) => a + b, 0) / maxTrials;
+        results[monthKey].avgLineDraw = lineDrawArray.reduce((a, b) => a + b, 0) / maxTrials;
+
+        // Calculate chances
+        results[monthKey].chanceLOCDraw =
+            (lineDrawArray.filter(d => d > 0).length / maxTrials) * 100;
+        results[monthKey].chanceCashNegative =
+            (cashArray.filter(c => c < 0).length / maxTrials) * 100;
+
+        // Calculate chance of cash >= 0 (for the gauge)
+        results[monthKey].chanceCashPositive =
+            (cashArray.filter(c => c >= 0).length / maxTrials) * 100;
+    }
+
+    return results;
+}
+
+/**
+ * Updates the dashboard with calculated values from Monte Carlo simulation
+ */
+function updateDashboard() {
+    if (!cfoData) {
+        console.warn("No CFO data loaded");
+        return;
+    }
+
+    // Get selected month from dropdown
+    const periodSelect = document.getElementById('periodSelect');
+    const selectedMonth = periodSelect ? parseInt(periodSelect.value) : 3;
+
+    console.log(`Running simulation for month ${selectedMonth}...`);
+
+    // Run Monte Carlo simulation for all trials
+    const results = runMonteCarloSimulation(selectedMonth);
+
+    console.log("Simulation complete:", results);
+
+    // Update gauge/chance meter for selected month
+    const monthKey = `month${selectedMonth}`;
+    if (results[monthKey]) {
+        updateGauge(results[monthKey].chanceCashPositive);
+    }
+
+    // Update Submitted Forecast table (deterministic values using median/mean)
+    updateSubmittedForecast();
+
+    // Update Simulated Cash Flow Results table
+    updateSimulatedResults(results, selectedMonth);
+}
+
+/**
+ * Updates the Submitted Forecast table with deterministic values
+ */
+function updateSubmittedForecast() {
+    // Use metadata averages from SIPmath data for deterministic forecast
+    const rev1Sip = getSIPByName('Rev_01');
+    const rev2Sip = getSIPByName('Rev_02');
+    const rev3Sip = getSIPByName('Rev_03');
+    const vExpSip = getSIPByName('V_Exp');
+    const fExpSip = getSIPByName('F_Exp');
+
+    const rev1 = rev1Sip?.metadata?.['Avg of 10,000'] || 180;
+    const rev2 = rev2Sip?.metadata?.['Avg of 10,000'] || 200;
+    const rev3 = rev3Sip?.metadata?.['Avg of 10,000'] || 220;
+    const vExpPct = vExpSip?.metadata?.['Avg of 10,000'] || 0.1;
+    const fExp = fExpSip?.metadata?.['Avg of 10,000'] || 150;
+
+    // Calculate OpEx for each month
+    const opex1 = rev1 * vExpPct + fExp - cutOpExValue;
+    const opex2 = rev2 * vExpPct + fExp - cutOpExValue;
+    const opex3 = rev3 * vExpPct + fExp - cutOpExValue;
+
+    // Calculate ending cash for each month
+    let cash1 = startingCash + rev1 - opex1 + collectARValue;
+    let cash2 = cash1 + rev2 - opex2 + collectARValue;
+    let cash3 = cash2 + rev3 - opex3 - 50 + collectARValue; // Month 3 has debt payment
+
+    // Update table cells (if they exist)
+    const updateCell = (id, value, isMonetary = true) => {
+        const cell = document.getElementById(id);
+        if (cell) {
+            cell.textContent = isMonetary ? `$${value.toFixed(0)}` : value.toFixed(1);
+        }
+    };
+
+    // Month 1
+    updateCell('submitted-revenues-mo1', rev1);
+    updateCell('submitted-opex-mo1', opex1);
+    updateCell('submitted-debt-mo1', 0);
+    updateCell('submitted-cash-mo1', cash1);
+
+    // Month 2
+    updateCell('submitted-revenues-mo2', rev2);
+    updateCell('submitted-opex-mo2', opex2);
+    updateCell('submitted-debt-mo2', 0);
+    updateCell('submitted-cash-mo2', cash2);
+
+    // Month 3
+    updateCell('submitted-revenues-mo3', rev3);
+    updateCell('submitted-opex-mo3', opex3);
+    updateCell('submitted-debt-mo3', 50);
+    updateCell('submitted-cash-mo3', cash3);
+}
+
+/**
+ * Updates the Simulated Results table with Monte Carlo statistics
+ */
+function updateSimulatedResults(results, selectedMonth) {
+    const updateCell = (id, value, isMonetary = true) => {
+        const cell = document.getElementById(id);
+        if (cell) {
+            if (isMonetary) {
+                cell.textContent = `$${value.toFixed(0)}`;
+            } else {
+                cell.textContent = `${value.toFixed(1)}%`;
+            }
+        }
+    };
+
+    // Month 1
+    if (results.month1) {
+        updateCell('simulated-cash-mo1', results.month1.avgCash);
+        updateCell('simulated-linedraw-mo1', results.month1.avgLineDraw);
+        updateCell('simulated-chance-loc-mo1', results.month1.chanceLOCDraw, false);
+        updateCell('simulated-chance-cash-mo1', results.month1.chanceCashNegative, false);
+    }
+
+    // Month 2
+    if (results.month2) {
+        updateCell('simulated-cash-mo2', results.month2.avgCash);
+        updateCell('simulated-linedraw-mo2', results.month2.avgLineDraw);
+        updateCell('simulated-chance-loc-mo2', results.month2.chanceLOCDraw, false);
+        updateCell('simulated-chance-cash-mo2', results.month2.chanceCashNegative, false);
+    }
+
+    // Month 3
+    if (results.month3) {
+        updateCell('simulated-cash-mo3', results.month3.avgCash);
+        updateCell('simulated-linedraw-mo3', results.month3.avgLineDraw);
+        updateCell('simulated-chance-loc-mo3', results.month3.chanceLOCDraw, false);
+        updateCell('simulated-chance-cash-mo3', results.month3.chanceCashNegative, false);
+    }
+}
+
+/**
+ * Evaluates a comparison condition.
+ * @param {number} value The value to compare.
+ * @param {string} operator The comparison operator (e.g., '>', '<').
+ * @param {number} target The target value to compare against.
+ * @returns {boolean} True if the condition is met, false otherwise.
+ */
+function evaluateCondition(value, operator, target) {
+    if (isNaN(value) || isNaN(target)) {
+        return false;
+    }
+    switch (operator) {
+        case '>': return value > target;
+        case '<': return value < target;
+        case '>=': return value >= target;
+        case '<=': return value <= target;
+        case '==': case '=': return value == target;
+        case '!=': case '<>': return value != target;
+        default:
+            console.warn(`Unsupported comparison operator: ${operator}`);
+            return false;
+    }
 }
