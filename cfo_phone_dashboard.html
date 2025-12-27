@@ -254,6 +254,44 @@
             transform: translateX(28px);
         }
 
+        /* Settings Input Groups */
+        .settings-input-group {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .settings-input-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .settings-input-label {
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            flex: 1;
+        }
+
+        .settings-input {
+            width: 80px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            padding: 8px 10px;
+            color: var(--text-primary);
+            font-family: 'Space Mono', monospace;
+            font-size: 13px;
+            text-align: right;
+            flex-shrink: 0;
+        }
+
+        .settings-input:focus {
+            outline: none;
+            border-color: var(--accent-green);
+        }
+
         .logo {
             display: flex;
             align-items: center;
@@ -1141,6 +1179,26 @@
                                 <span class="radio-custom"></span>
                                 <span class="toggle-label">ChancePlan Forecast</span>
                             </label>
+                        </div>
+                    </div>
+
+                    <div class="settings-section">
+                        <div class="settings-section-title">Financial Parameters</div>
+                        <div class="settings-input-group">
+                            <label class="settings-input-label">Fixed Exp Monthly Growth</label>
+                            <input type="text" class="settings-input" value="$10" id="fixedExpGrowth">
+                        </div>
+                        <div class="settings-input-group">
+                            <label class="settings-input-label">Loan Payment (M3)</label>
+                            <input type="text" class="settings-input" value="$50" id="loanPayment">
+                        </div>
+                        <div class="settings-input-group">
+                            <label class="settings-input-label">Beginning Cash</label>
+                            <input type="text" class="settings-input" value="$50" id="beginningCash">
+                        </div>
+                        <div class="settings-input-group">
+                            <label class="settings-input-label">Line of Credit (Current)</label>
+                            <input type="text" class="settings-input" value="$20" id="lineOfCreditCurrent">
                         </div>
                     </div>
                 </div>

@@ -299,7 +299,7 @@ const cashPathsData = [{
   "version": "1"
 }]
 function generateCashPath(seed) {
-    const startingCash = 50;
+    // Use global startingCash value
     const path = [startingCash];
     
     const random = () => {
@@ -496,14 +496,13 @@ document.getElementById('periodSelect').addEventListener('change', function() {
 
 // Update LOC Limit based on Increase LOC input
 function updateLOCLimit() {
-    const baseLOC = 20;
     const increaseLOCInput = document.getElementById('increaseLOC');
     const locLimitValue = document.getElementById('loc-limit-value');
 
     if (increaseLOCInput && locLimitValue) {
         // Parse the value from the input, removing $ and commas
         const increaseValue = parseFloat(increaseLOCInput.value.replace(/[$,]/g, '')) || 0;
-        const newLOCLimit = baseLOC + increaseValue;
+        const newLOCLimit = baseLOCLimit + increaseValue;
         locLimitValue.textContent = '$' + newLOCLimit.toFixed(0);
     }
 }
@@ -613,6 +612,46 @@ document.addEventListener('DOMContentLoaded', function() {
         updateDashboard();
     });
 
+    // Listen for changes on Line of Credit (Current) input in settings
+    const lineOfCreditCurrentInput = document.getElementById('lineOfCreditCurrent');
+    if (lineOfCreditCurrentInput) {
+        lineOfCreditCurrentInput.addEventListener('input', function() {
+            const locValue = parseFloat(this.value.replace(/[$,]/g, '')) || 0;
+            // Update the base LOC limit
+            baseLOCLimit = locValue;
+            updateLOCLimit();
+            updateDashboard();
+        });
+    }
+
+    // Listen for changes on Beginning Cash input in settings
+    const beginningCashInput = document.getElementById('beginningCash');
+    if (beginningCashInput) {
+        beginningCashInput.addEventListener('input', function() {
+            const cashValue = parseFloat(this.value.replace(/[$,]/g, '')) || 0;
+            startingCash = cashValue;
+            updateDashboard();
+        });
+    }
+
+    // Listen for changes on Fixed Exp Monthly Growth input in settings
+    const fixedExpGrowthInput = document.getElementById('fixedExpGrowth');
+    if (fixedExpGrowthInput) {
+        fixedExpGrowthInput.addEventListener('input', function() {
+            fixedExpGrowth = parseFloat(this.value.replace(/[$,]/g, '')) || 0;
+            updateDashboard();
+        });
+    }
+
+    // Listen for changes on Loan Payment input in settings
+    const loanPaymentInput = document.getElementById('loanPayment');
+    if (loanPaymentInput) {
+        loanPaymentInput.addEventListener('input', function() {
+            loanPayment = parseFloat(this.value.replace(/[$,]/g, '')) || 0;
+            updateDashboard();
+        });
+    }
+
     // Initialize LOC Limit display
     updateLOCLimit();
 
@@ -640,8 +679,10 @@ let collectARValue = 0;
 let increaseLOCValue = 0;
 
 // Starting conditions
-const startingCash = 50; // $50k starting cash
-const baseLOCLimit = 20; // $20k base line of credit
+let startingCash = 50; // $50k starting cash
+let baseLOCLimit = 20; // $20k base line of credit
+let fixedExpGrowth = 10; // $10k monthly growth
+let loanPayment = 50; // $50k loan payment in month 3
 
 // === Mathematical Helper Functions ===
 
