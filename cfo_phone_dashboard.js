@@ -545,6 +545,36 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // Font size toggle functionality
+    const fontSizeBtns = document.querySelectorAll('.font-size-btn');
+
+    // Set initial font size (default to medium)
+    const savedFontSize = localStorage.getItem('fontSize') || 'medium';
+    htmlElement.setAttribute('data-font-size', savedFontSize);
+
+    // Set active button on load
+    fontSizeBtns.forEach(btn => {
+        if (btn.getAttribute('data-size') === savedFontSize) {
+            btn.classList.add('active');
+        }
+    });
+
+    // Add click handlers
+    fontSizeBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            // Remove active class from all buttons
+            fontSizeBtns.forEach(b => b.classList.remove('active'));
+
+            // Add active class to clicked button
+            this.classList.add('active');
+
+            // Get font size and apply it
+            const fontSize = this.getAttribute('data-size');
+            htmlElement.setAttribute('data-font-size', fontSize);
+            localStorage.setItem('fontSize', fontSize);
+        });
+    });
+
     // Settings menu toggle
     const settingsBtn = document.getElementById('settingsBtn');
     const settingsDropdown = document.getElementById('settingsDropdown');
@@ -654,6 +684,63 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initialize LOC Limit display
     updateLOCLimit();
+
+    // Engine toggle functionality
+    const engineBtns = document.querySelectorAll('.engine-toggle-btn');
+    engineBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            // Remove active class from all buttons
+            engineBtns.forEach(b => b.classList.remove('active'));
+
+            // Add active class to clicked button
+            this.classList.add('active');
+
+            // Get engine type and trigger any needed updates
+            const engineType = this.getAttribute('data-engine');
+            console.log('Calculation Engine changed to:', engineType);
+            // You can add additional logic here to handle engine switching
+        });
+    });
+
+    // Card selector functionality for mobile
+    const selectorBtns = document.querySelectorAll('.selector-toggle-btn');
+    const cardSubmitted = document.querySelector('.card-submitted');
+    const cardSimulated = document.querySelector('.card-simulated');
+    const cardChart = document.querySelector('.card-chart');
+
+    selectorBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            // Remove active class from all buttons
+            selectorBtns.forEach(b => b.classList.remove('active'));
+
+            // Add active class to clicked button
+            this.classList.add('active');
+
+            // Hide all cards
+            cardSubmitted?.classList.remove('active');
+            cardSimulated?.classList.remove('active');
+            cardChart?.classList.remove('active');
+
+            // Show selected card
+            const cardType = this.getAttribute('data-card');
+            if (cardType === 'submitted') {
+                cardSubmitted?.classList.add('active');
+                cardSubmitted.style.display = 'block';
+                cardSimulated.style.display = 'none';
+                cardChart.style.display = 'none';
+            } else if (cardType === 'simulated') {
+                cardSimulated?.classList.add('active');
+                cardSubmitted.style.display = 'none';
+                cardSimulated.style.display = 'block';
+                cardChart.style.display = 'none';
+            } else if (cardType === 'chart') {
+                cardChart?.classList.add('active');
+                cardSubmitted.style.display = 'none';
+                cardSimulated.style.display = 'none';
+                cardChart.style.display = 'block';
+            }
+        });
+    });
 
     // Process CFO SIPmath data on page load
     processCFOData();
