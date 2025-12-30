@@ -64,6 +64,14 @@
                             <input type="text" class="settings-input" value="$20" id="lineOfCreditCurrent">
                         </div>
                     </div>
+
+                    <div class="settings-section">
+                        <div class="settings-section-title">Simulation Parameters</div>
+                        <div class="settings-input-group">
+                            <label class="settings-input-label">Max Trial Numbers</label>
+                            <input type="number" class="settings-input" value="10000" id="maxTrialsInput" min="100" max="100000" step="100">
+                        </div>
+                    </div>
                 </div>
             </div>
         </header>
@@ -284,7 +292,7 @@
                             <div class="control-group">
                                 <span class="control-label">Starting Trial</span>
                                 <div class="number-input">
-                                    <input type="number" id="startTrial" value="33" min="1">
+                                    <input type="number" id="startTrial" value="33" min="1" max="10000">
                                     <div class="number-btn">
                                         <button onclick="adjustValue('startTrial', 1)">▲</button>
                                         <button onclick="adjustValue('startTrial', -1)">▼</button>
@@ -294,7 +302,7 @@
                             <div class="control-group">
                                 <span class="control-label">Number of Trial Paths</span>
                                 <div class="number-input">
-                                    <input type="number" id="numCurves" value="10" min="1" max="50">
+                                    <input type="number" id="numCurves" value="10" min="1">
                                     <div class="number-btn">
                                         <button onclick="adjustValue('numCurves', 1)">▲</button>
                                         <button onclick="adjustValue('numCurves', -1)">▼</button>

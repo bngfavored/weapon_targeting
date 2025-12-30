@@ -471,6 +471,10 @@ body {
     flex-shrink: 0;
 }
 
+#maxTrialsInput {
+    width: 120px;
+}
+
 .settings-input:focus {
     outline: none;
     border-color: var(--accent-green);
@@ -885,7 +889,7 @@ select:focus {
     fill: none;
     stroke: url(#gaugeGradient);
     stroke-width: 20;
-    stroke-linecap: round;
+    stroke-linecap: butt;
     transition: stroke-dashoffset 0.8s ease-out;
 }
 

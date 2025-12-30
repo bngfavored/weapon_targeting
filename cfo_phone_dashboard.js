@@ -328,13 +328,20 @@ function getPathColor(index, total) {
 let chart;
 function initChart() {
     const ctx = document.getElementById('cashPathsChart').getContext('2d');
-    
-    const startTrial = parseInt(document.getElementById('startTrial').value);
-    const numCurves = parseInt(document.getElementById('numCurves').value);
-    
-    document.getElementById('chartTitle').textContent = 
+
+    let startTrial = parseInt(document.getElementById('startTrial').value);
+    let numCurves = parseInt(document.getElementById('numCurves').value);
+
+    // Safety check: ensure we don't exceed maxTrials
+    const endTrial = startTrial + numCurves - 1;
+    if (endTrial > maxTrials) {
+        numCurves = maxTrials - startTrial + 1;
+        document.getElementById('numCurves').value = numCurves;
+    }
+
+    document.getElementById('chartTitle').textContent =
         `Ending Cash Paths ${startTrial}-${startTrial + numCurves - 1}`;
-    
+
     const datasets = [];
     for (let i = 0; i < numCurves; i++) {
         const data = generateCashPath(startTrial + i);
@@ -458,6 +465,25 @@ function updateGauge(percentage) {
     }
 }
 
+function updateChartInputConstraints() {
+    const startTrialInput = document.getElementById('startTrial');
+    const numCurvesInput = document.getElementById('numCurves');
+
+    const startTrial = parseInt(startTrialInput.value) || 1;
+    const numCurves = parseInt(numCurvesInput.value) || 1;
+
+    // Calculate max allowed curves based on starting trial
+    const maxCurves = maxTrials - startTrial + 1;
+
+    // Update the max attribute
+    numCurvesInput.max = maxCurves;
+
+    // If current numCurves exceeds the new max, adjust it
+    if (numCurves > maxCurves) {
+        numCurvesInput.value = maxCurves;
+    }
+}
+
 function adjustValue(inputId, delta) {
     const input = document.getElementById(inputId);
     let value = parseInt(input.value) + delta;
@@ -465,11 +491,31 @@ function adjustValue(inputId, delta) {
     const max = parseInt(input.max) || 999;
     value = Math.max(min, Math.min(max, value));
     input.value = value;
+
+    // Update constraints if startTrial changed
+    if (inputId === 'startTrial') {
+        updateChartInputConstraints();
+    }
+
     initChart();
 }
 
-document.getElementById('startTrial').addEventListener('change', initChart);
-document.getElementById('numCurves').addEventListener('change', initChart);
+document.getElementById('startTrial').addEventListener('change', function() {
+    updateChartInputConstraints();
+    initChart();
+});
+document.getElementById('numCurves').addEventListener('change', function() {
+    updateChartInputConstraints();
+    initChart();
+});
+
+// Also validate on input (as user types)
+document.getElementById('startTrial').addEventListener('input', function() {
+    updateChartInputConstraints();
+});
+document.getElementById('numCurves').addEventListener('input', function() {
+    updateChartInputConstraints();
+});
 
 // Sync both forecast toggles
 function handleForecastChange(value) {
@@ -530,6 +576,9 @@ function updateLOCLimit() {
 
 // Add event listeners for CFO Levers inputs
 document.addEventListener('DOMContentLoaded', function() {
+    // Initialize chart input constraints
+    updateChartInputConstraints();
+
     initChart();
     updateGauge(91.1);
 
@@ -701,6 +750,18 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // Listen for changes on Max Trials input in settings
+    const maxTrialsInput = document.getElementById('maxTrialsInput');
+    if (maxTrialsInput) {
+        maxTrialsInput.addEventListener('input', function() {
+            const newMaxTrials = parseInt(this.value) || 10000;
+            maxTrials = Math.max(100, Math.min(100000, newMaxTrials)); // Clamp between 100 and 100,000
+            this.value = maxTrials; // Update the input to show the clamped value
+            updateChartInputConstraints();
+            updateDashboard();
+        });
+    }
+
     // Initialize LOC Limit display
     updateLOCLimit();
 
@@ -781,7 +842,7 @@ let cfoData = null; // Stores the loaded SIPmath data
 let correlationMatrixData = null; // Stores correlation matrix if present
 let numSips = 0; // Number of SIPs in the model
 let rngParamsArray = []; // Stores RNG parameters for each SIP
-const maxTrials = 10000; // Number of Monte Carlo trials to run
+let maxTrials = 10000; // Number of Monte Carlo trials to run (configurable)
 
 // CFO Lever values (user inputs)
 let cutOpExValue = 0;
