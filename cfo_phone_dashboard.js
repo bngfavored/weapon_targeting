@@ -570,7 +570,14 @@ function updateLOCLimit() {
         // Parse the value from the input, handling accounting format
         const increaseValue = parseAccountingNumber(increaseLOCInput.value);
         const newLOCLimit = baseLOCLimit + increaseValue;
-        locLimitValue.textContent = '$' + newLOCLimit.toFixed(0);
+        const rounded = Math.round(newLOCLimit);
+
+        // Format with no sign if zero
+        if (rounded === 0) {
+            locLimitValue.textContent = '$0';
+        } else {
+            locLimitValue.textContent = '$' + rounded;
+        }
     }
 }
 
@@ -745,7 +752,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const loanPaymentInput = document.getElementById('loanPayment');
     if (loanPaymentInput) {
         loanPaymentInput.addEventListener('input', function() {
-            loanPayment = parseAccountingNumber(this.value);
+            // Negate because user enters positive value but it's stored as negative (outflow)
+            loanPayment = -parseAccountingNumber(this.value);
             updateDashboard();
         });
     }
@@ -853,7 +861,7 @@ let increaseLOCValue = 0;
 let startingCash = 50; // $50k starting cash
 let baseLOCLimit = 20; // $20k base line of credit
 let fixedExpGrowth = 10; // $10k monthly growth
-let loanPayment = 50; // $50k loan payment in month 3
+let loanPayment = -50; // -$50k loan payment in month 3 (negative = outflow)
 
 // Calculation engine mode (matches Excel W9 toggle)
 // 'submitted' = Use deterministic averages (Excel W5=1)
@@ -1386,11 +1394,12 @@ function calculateTrialCashPosition(trialNum, month) {
     // Calculate total OpEx
     const totalOpEx = variableExp + fixedExpWithGrowth;
 
-    // Debt payment (only in month 3)
+    // Debt payment (only in month 3) - loanPayment is negative (outflow)
     const debtPayment = (month === 3) ? loanPayment : 0;
 
     // Calculate cash flow for this month
-    const cashFlow = revenue - totalOpEx - debtPayment;
+    // Since debtPayment is negative, adding it subtracts from cash flow
+    const cashFlow = revenue - totalOpEx + debtPayment;
 
     // Get starting cash for this month (cumulative from previous months)
     // IMPORTANT: Use cashPosition (before line draws), NOT endingCash (after line draws)
@@ -1548,20 +1557,21 @@ function updateSubmittedForecast() {
     // NO Cut OpEx applied to Submitted Forecast!
 
     // Calculate OpEx for each month (matches Excel E14, F14, G14)
-    // Formula: V_Exp*Revenue + F_Exp + monthly_growth
-    const opex1 = rev1 * vExpPct + fExp; // Month 1: no growth
-    const opex2 = rev2 * vExpPct + fExp + fixedExpGrowth; // Month 2: +$10k
-    const opex3 = rev3 * vExpPct + fExp + 2 * fixedExpGrowth; // Month 3: +$20k
+    // Formula: -(V_Exp*Revenue + F_Exp + monthly_growth)
+    const opex1 = -(rev1 * vExpPct + fExp); // Month 1: no growth
+    const opex2 = -(rev2 * vExpPct + fExp + fixedExpGrowth); // Month 2: +$10k
+    const opex3 = -(rev3 * vExpPct + fExp + 2 * fixedExpGrowth); // Month 3: +$20k
 
     // Calculate cash flow for each month (matches Excel E16, F16, G16)
-    const cashFlow1 = rev1 - opex1;
-    const cashFlow2 = rev2 - opex2;
-    const cashFlow3 = rev3 - opex3 - loanPayment; // Month 3 has debt payment
+    // Formula: SUM(revenue + opex + debt) where opex and debt are negative
+    const cashFlow1 = rev1 + opex1; // Month 1: no debt payment
+    const cashFlow2 = rev2 + opex2; // Month 2: no debt payment
+    const cashFlow3 = rev3 + opex3 + loanPayment; // Month 3: includes debt payment
 
-    // Calculate ending cash for each month (matches Excel E18, F18, G18)
-    let cash1 = startingCash + cashFlow1;
-    let cash2 = cash1 + cashFlow2;
-    let cash3 = cash2 + cashFlow3;
+    // Calculate ending cash for each month BEFORE line draws (matches Excel E18, F18, G18)
+    const cash1 = startingCash + cashFlow1;
+    const cash2 = cash1 + cashFlow2;
+    const cash3 = cash2 + cashFlow3;
 
     // Calculate line draws if needed (matches Excel E19, F19, G19)
     const locLimit = baseLOCLimit + increaseLOCValue;
@@ -1569,16 +1579,36 @@ function updateSubmittedForecast() {
     const lineDraw2 = Math.min(locLimit, Math.max(0, -cash2));
     const lineDraw3 = Math.min(locLimit, Math.max(0, -cash3));
 
-    // Apply line draws to final cash
-    cash1 += lineDraw1;
-    cash2 += lineDraw2;
-    cash3 += lineDraw3;
+    // Note: Cash row displays cash BEFORE line draws
+    // Line draws are shown separately in the Line Draw row
 
     // Update table cells (if they exist)
     const updateCell = (id, value, isMonetary = true) => {
         const cell = document.getElementById(id);
         if (cell) {
-            cell.textContent = isMonetary ? `$${value.toFixed(0)}` : value.toFixed(1);
+            const rounded = isMonetary ? Math.round(value) : parseFloat(value.toFixed(1));
+
+            // Format the value
+            if (isMonetary) {
+                // Handle zero case - no sign
+                if (rounded === 0) {
+                    cell.textContent = '$0';
+                } else {
+                    cell.textContent = `$${rounded}`;
+                }
+            } else {
+                cell.textContent = value.toFixed(1);
+            }
+
+            // Apply color classes and handle value-highlight
+            cell.classList.remove('value-positive', 'value-negative', 'value-neutral', 'value-highlight', 'value-warning');
+            if (rounded < 0) {
+                cell.classList.add('value-warning'); // Use value-warning for negative (red background)
+            } else if (rounded > 0) {
+                cell.classList.add('value-highlight'); // Use value-highlight for positive (green background)
+            } else {
+                cell.classList.add('value-neutral');
+            }
         }
     };
 
@@ -1609,7 +1639,9 @@ function updateSubmittedForecast() {
     // Update starting cash display
     const startCashCell = document.getElementById('submitted-starting-cash');
     if (startCashCell) {
-        startCashCell.textContent = `Starting Cash: $${startingCash}`;
+        const rounded = Math.round(startingCash);
+        const cashDisplay = rounded === 0 ? '$0' : `$${rounded}`;
+        startCashCell.textContent = `Starting Cash: ${cashDisplay}`;
     }
 }
 
@@ -1620,10 +1652,28 @@ function updateSimulatedResults(results, selectedMonth) {
     const updateCell = (id, value, isMonetary = true) => {
         const cell = document.getElementById(id);
         if (cell) {
+            const rounded = isMonetary ? Math.round(value) : parseFloat(value.toFixed(1));
+
+            // Format the value
             if (isMonetary) {
-                cell.textContent = `$${value.toFixed(0)}`;
+                // Handle zero case - no sign
+                if (rounded === 0) {
+                    cell.textContent = '$0';
+                } else {
+                    cell.textContent = `$${rounded}`;
+                }
             } else {
                 cell.textContent = `${value.toFixed(1)}%`;
+            }
+
+            // Apply color classes and handle value-highlight
+            cell.classList.remove('value-positive', 'value-negative', 'value-neutral', 'value-highlight', 'value-warning');
+            if (rounded < 0) {
+                cell.classList.add('value-warning'); // Use value-warning for negative (red background)
+            } else if (rounded > 0) {
+                cell.classList.add('value-highlight'); // Use value-highlight for positive (green background)
+            } else {
+                cell.classList.add('value-neutral');
             }
         }
     };
