@@ -298,23 +298,23 @@ const cashPathsData = [{
   ],
   "version": "1"
 }]
-function generateCashPath(seed) {
-    // Use global startingCash value
+/**
+ * Generates the cash path for a specific trial using actual Monte Carlo calculations
+ * Matches Excel ChancePlanAI K5:O15 and PMTable Cash_01/02/03 columns
+ * @param {number} trialNum - The trial number to calculate (e.g., 33, 34, 35...)
+ * @returns {Array} Array of [Month0, Month1, Month2, Month3] ending cash values
+ */
+function generateCashPath(trialNum) {
+    // Month 0: Starting cash
     const path = [startingCash];
-    
-    const random = () => {
-        seed = (seed * 9301 + 49297) % 233280;
-        return seed / 233280;
-    };
-    
-    let cash = startingCash;
-    for (let i = 1; i <= 3; i++) {
-        const baseFlow = [12, 20, -22][i-1];
-        const variance = (random() - 0.5) * 60;
-        cash += baseFlow + variance;
-        path.push(Math.round(cash));
+
+    // Calculate ending cash for each month using actual simulation
+    // Excel shows endingCash (after line draws) from PMTable J/K/L columns
+    for (let month = 1; month <= 3; month++) {
+        const position = calculateTrialCashPosition(trialNum, month);
+        path.push(Math.round(position.endingCash));
     }
-    
+
     return path;
 }
 
@@ -402,7 +402,20 @@ function initChart() {
                 },
                 y: {
                     grid: {
-                        color: 'rgba(148, 163, 184, 0.1)',
+                        color: function(context) {
+                            // Make the $0 line bold and darker
+                            if (context.tick.value === 0) {
+                                return 'rgba(148, 163, 184, 0.8)';
+                            }
+                            return 'rgba(148, 163, 184, 0.1)';
+                        },
+                        lineWidth: function(context) {
+                            // Make the $0 line thicker
+                            if (context.tick.value === 0) {
+                                return 2;
+                            }
+                            return 1;
+                        }
                     },
                     ticks: {
                         color: '#64748b',
@@ -1410,9 +1423,15 @@ function updateDashboard() {
 
     // Get selected month from dropdown
     const periodSelect = document.getElementById('periodSelect');
-    const selectedMonth = periodSelect ? parseInt(periodSelect.value) : 3;
+    let selectedMonth = periodSelect ? parseInt(periodSelect.value) : 3;
+
+    // Handle "Quarter" selection - use Month 3
+    if (isNaN(selectedMonth) || periodSelect?.value === 'quarter') {
+        selectedMonth = 3;
+    }
 
     console.log(`Running simulation for month ${selectedMonth}...`);
+    console.log(`CFO Levers: Cut OpEx=${cutOpExValue}, Collect A/R=${collectARValue}, Increase LOC=${increaseLOCValue}`);
 
     // Run Monte Carlo simulation for all trials
     const results = runMonteCarloSimulation(selectedMonth);
@@ -1430,6 +1449,9 @@ function updateDashboard() {
 
     // Update Simulated Cash Flow Results table
     updateSimulatedResults(results, selectedMonth);
+
+    // Update Ending Cash Paths chart with actual simulation data
+    initChart();
 }
 
 /**
