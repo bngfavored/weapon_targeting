@@ -695,10 +695,14 @@ document.addEventListener('DOMContentLoaded', function() {
             // Add active class to clicked button
             this.classList.add('active');
 
-            // Get engine type and trigger any needed updates
+            // Get engine type and update global variable
             const engineType = this.getAttribute('data-engine');
+            calculationEngine = engineType; // 'submitted' or 'chanceplan'
+
             console.log('Calculation Engine changed to:', engineType);
-            // You can add additional logic here to handle engine switching
+
+            // Recalculate dashboard with new engine mode
+            updateDashboard();
         });
     });
 
@@ -770,6 +774,11 @@ let startingCash = 50; // $50k starting cash
 let baseLOCLimit = 20; // $20k base line of credit
 let fixedExpGrowth = 10; // $10k monthly growth
 let loanPayment = 50; // $50k loan payment in month 3
+
+// Calculation engine mode (matches Excel W9 toggle)
+// 'submitted' = Use deterministic averages (Excel W5=1)
+// 'chanceplan' = Use stochastic SIPmath trials (Excel W5=2)
+let calculationEngine = 'submitted';
 
 // === Mathematical Helper Functions ===
 
@@ -1203,38 +1212,76 @@ function getSIPByName(sipName) {
 
 /**
  * Calculates the ending cash position for a specific trial and month.
- * Formula: Cash = Starting Cash + Revenues - OpEx - Debt + CFO Levers
+ * Formula: Cash = Starting Cash + Revenues - OpEx - Debt + LOC Draw
+ * CFO Levers:
+ *   - Collect A/R: Added to Month 3 REVENUE only
+ *   - Cut OpEx: Reduces FIXED EXPENSES
+ *   - Increase LOC: Increases line of credit limit
+ * Engine Mode:
+ *   - 'submitted': Uses deterministic metadata averages (matches Excel W5=1)
+ *   - 'chanceplan': Uses stochastic trial calculations (matches Excel W5=2)
  * @param {number} trialNum - The trial number (1-maxTrials)
  * @param {number} month - The month number (1-3)
- * @returns {object} { endingCash, revenue, opex, debt, cashFlow, startingCash }
+ * @returns {object} { endingCash, revenue, opex, debt, cashFlow, startingCash, lineDraw, cashPosition }
  */
 function calculateTrialCashPosition(trialNum, month) {
     // Get revenue for this month
     const revSip = getSIPByName(`Rev_0${month}`);
-    const revenue = revSip ? calculateTrialValue(revSip, trialNum) : 0;
+    let revenue;
+
+    // Check calculation engine mode (matches Excel IF($W$9, D11, F11) logic)
+    if (calculationEngine === 'submitted') {
+        // Use deterministic metadata average (Excel D column)
+        revenue = revSip?.metadata?.['Avg of 10,000'] || 0;
+    } else {
+        // Use stochastic trial calculation (Excel F column)
+        revenue = revSip ? calculateTrialValue(revSip, trialNum) : 0;
+    }
+
+    // Add Collect A/R to Month 3 revenue ONLY (matches Excel E13 formula)
+    if (month === 3) {
+        revenue += collectARValue;
+    }
 
     // Get variable expenses (as percentage of revenue)
     const vExpSip = getSIPByName('V_Exp');
-    const vExpPct = vExpSip ? calculateTrialValue(vExpSip, trialNum) : 0;
+    let vExpPct;
+
+    if (calculationEngine === 'submitted') {
+        vExpPct = vExpSip?.metadata?.['Avg of 10,000'] || 0.1;
+    } else {
+        vExpPct = vExpSip ? calculateTrialValue(vExpSip, trialNum) : 0.1;
+    }
+
+    const variableExp = revenue * vExpPct;
 
     // Get fixed expenses
     const fExpSip = getSIPByName('F_Exp');
-    const fixedExp = fExpSip ? calculateTrialValue(fExpSip, trialNum) : 0;
+    let baseFixedExp;
+
+    if (calculationEngine === 'submitted') {
+        baseFixedExp = fExpSip?.metadata?.['Avg of 10,000'] || 150;
+    } else {
+        baseFixedExp = fExpSip ? calculateTrialValue(fExpSip, trialNum) : 150;
+    }
+
+    // Apply Cut OpEx to base fixed expenses FIRST (matches Excel E15 formula)
+    const fixedExpAfterCuts = baseFixedExp - cutOpExValue;
+
+    // Add monthly growth AFTER applying cuts (matches Excel E31, F31, G31)
+    // Month 1: +$0, Month 2: +$10k, Month 3: +$20k
+    const fixedExpWithGrowth = fixedExpAfterCuts + (month - 1) * fixedExpGrowth;
 
     // Calculate total OpEx
-    const variableExp = revenue * vExpPct;
-    const totalOpEx = variableExp + fixedExp;
-
-    // Apply CFO Levers
-    const opExAfterCuts = totalOpEx - cutOpExValue;
+    const totalOpEx = variableExp + fixedExpWithGrowth;
 
     // Debt payment (only in month 3)
-    const debtPayment = (month === 3) ? 50 : 0;
+    const debtPayment = (month === 3) ? loanPayment : 0;
 
     // Calculate cash flow for this month
-    const cashFlow = revenue - opExAfterCuts - debtPayment;
+    const cashFlow = revenue - totalOpEx - debtPayment;
 
-    // Get starting cash for this month
+    // Get starting cash for this month (cumulative from previous months)
     let startCash = startingCash;
     if (month > 1) {
         // Need to calculate cumulative cash from previous months
@@ -1244,21 +1291,34 @@ function calculateTrialCashPosition(trialNum, month) {
         }
     }
 
-    // Calculate ending cash
-    const endingCash = startCash + cashFlow + collectARValue;
+    // Calculate operating cash position (before LOC draw)
+    const cashPosition = startCash + cashFlow;
+
+    // Calculate line of credit draw if needed (matches Excel E37, F37, G37)
+    const locLimit = baseLOCLimit + increaseLOCValue;
+    let lineDraw = 0;
+    if (cashPosition < 0) {
+        lineDraw = Math.min(Math.abs(cashPosition), locLimit);
+    }
+
+    // Calculate ending cash (after LOC draw)
+    const endingCash = cashPosition + lineDraw;
 
     return {
         endingCash: endingCash,
         revenue: revenue,
-        opex: opExAfterCuts,
+        opex: totalOpEx,
         debt: debtPayment,
         cashFlow: cashFlow,
-        startingCash: startCash
+        startingCash: startCash,
+        lineDraw: lineDraw,
+        cashPosition: cashPosition
     };
 }
 
 /**
  * Runs Monte Carlo simulation for all months
+ * Matches Excel PMTable calculations
  * @param {number} selectedMonth - The month to focus analysis on
  * @returns {object} Simulation results with statistics
  */
@@ -1269,21 +1329,14 @@ function runMonteCarloSimulation(selectedMonth) {
         month3: { cash: [], lineDraw: [], chanceLOCDraw: 0, chanceCashNegative: 0 }
     };
 
-    // Run trials
+    // Run trials (matches Excel PMTable rows 4-10003)
     for (let trial = 1; trial <= maxTrials; trial++) {
         for (let month = 1; month <= 3; month++) {
             const position = calculateTrialCashPosition(trial, month);
 
-            // Determine if LOC is needed
-            const locLimit = baseLOCLimit + increaseLOCValue;
-            let lineDraw = 0;
-            let finalCash = position.endingCash;
-
-            if (position.endingCash < 0) {
-                // Need to draw from line of credit
-                lineDraw = Math.min(Math.abs(position.endingCash), locLimit);
-                finalCash = position.endingCash + lineDraw;
-            }
+            // Use calculated values from position (already includes LOC logic)
+            const finalCash = position.endingCash;
+            const lineDraw = position.lineDraw || 0;
 
             const monthKey = `month${month}`;
             results[monthKey].cash.push(finalCash);
@@ -1291,7 +1344,7 @@ function runMonteCarloSimulation(selectedMonth) {
         }
     }
 
-    // Calculate statistics for each month
+    // Calculate statistics for each month (matches Excel Chanceboard E23-G27)
     for (let month = 1; month <= 3; month++) {
         const monthKey = `month${month}`;
         const cashArray = results[monthKey].cash;
@@ -1350,6 +1403,9 @@ function updateDashboard() {
 
 /**
  * Updates the Submitted Forecast table with deterministic values
+ * Matches Excel Chanceboard sheet rows 13-19
+ * IMPORTANT: This table shows the ORIGINAL SUBMITTED PLAN without CFO lever adjustments!
+ * Only "Increase LOC" affects this table (in line draw calculations).
  */
 function updateSubmittedForecast() {
     // Use metadata averages from SIPmath data for deterministic forecast
@@ -1359,21 +1415,42 @@ function updateSubmittedForecast() {
     const vExpSip = getSIPByName('V_Exp');
     const fExpSip = getSIPByName('F_Exp');
 
+    // Base values from ChancePlanAI D column (NO CFO LEVERS APPLIED!)
     const rev1 = rev1Sip?.metadata?.['Avg of 10,000'] || 180;
     const rev2 = rev2Sip?.metadata?.['Avg of 10,000'] || 200;
     const rev3 = rev3Sip?.metadata?.['Avg of 10,000'] || 220;
     const vExpPct = vExpSip?.metadata?.['Avg of 10,000'] || 0.1;
     const fExp = fExpSip?.metadata?.['Avg of 10,000'] || 150;
 
-    // Calculate OpEx for each month
-    const opex1 = rev1 * vExpPct + fExp - cutOpExValue;
-    const opex2 = rev2 * vExpPct + fExp - cutOpExValue;
-    const opex3 = rev3 * vExpPct + fExp - cutOpExValue;
+    // NO Collect A/R applied to Submitted Forecast!
+    // NO Cut OpEx applied to Submitted Forecast!
 
-    // Calculate ending cash for each month
-    let cash1 = startingCash + rev1 - opex1 + collectARValue;
-    let cash2 = cash1 + rev2 - opex2 + collectARValue;
-    let cash3 = cash2 + rev3 - opex3 - 50 + collectARValue; // Month 3 has debt payment
+    // Calculate OpEx for each month (matches Excel E14, F14, G14)
+    // Formula: V_Exp*Revenue + F_Exp + monthly_growth
+    const opex1 = rev1 * vExpPct + fExp; // Month 1: no growth
+    const opex2 = rev2 * vExpPct + fExp + fixedExpGrowth; // Month 2: +$10k
+    const opex3 = rev3 * vExpPct + fExp + 2 * fixedExpGrowth; // Month 3: +$20k
+
+    // Calculate cash flow for each month (matches Excel E16, F16, G16)
+    const cashFlow1 = rev1 - opex1;
+    const cashFlow2 = rev2 - opex2;
+    const cashFlow3 = rev3 - opex3 - loanPayment; // Month 3 has debt payment
+
+    // Calculate ending cash for each month (matches Excel E18, F18, G18)
+    let cash1 = startingCash + cashFlow1;
+    let cash2 = cash1 + cashFlow2;
+    let cash3 = cash2 + cashFlow3;
+
+    // Calculate line draws if needed (matches Excel E19, F19, G19)
+    const locLimit = baseLOCLimit + increaseLOCValue;
+    const lineDraw1 = Math.min(locLimit, Math.max(0, -cash1));
+    const lineDraw2 = Math.min(locLimit, Math.max(0, -cash2));
+    const lineDraw3 = Math.min(locLimit, Math.max(0, -cash3));
+
+    // Apply line draws to final cash
+    cash1 += lineDraw1;
+    cash2 += lineDraw2;
+    cash3 += lineDraw3;
 
     // Update table cells (if they exist)
     const updateCell = (id, value, isMonetary = true) => {
@@ -1387,19 +1464,31 @@ function updateSubmittedForecast() {
     updateCell('submitted-revenues-mo1', rev1);
     updateCell('submitted-opex-mo1', opex1);
     updateCell('submitted-debt-mo1', 0);
+    updateCell('submitted-cashflow-mo1', cashFlow1);
     updateCell('submitted-cash-mo1', cash1);
+    updateCell('submitted-linedraw-mo1', lineDraw1);
 
     // Month 2
     updateCell('submitted-revenues-mo2', rev2);
     updateCell('submitted-opex-mo2', opex2);
     updateCell('submitted-debt-mo2', 0);
+    updateCell('submitted-cashflow-mo2', cashFlow2);
     updateCell('submitted-cash-mo2', cash2);
+    updateCell('submitted-linedraw-mo2', lineDraw2);
 
     // Month 3
     updateCell('submitted-revenues-mo3', rev3);
     updateCell('submitted-opex-mo3', opex3);
-    updateCell('submitted-debt-mo3', 50);
+    updateCell('submitted-debt-mo3', loanPayment);
+    updateCell('submitted-cashflow-mo3', cashFlow3);
     updateCell('submitted-cash-mo3', cash3);
+    updateCell('submitted-linedraw-mo3', lineDraw3);
+
+    // Update starting cash display
+    const startCashCell = document.getElementById('submitted-starting-cash');
+    if (startCashCell) {
+        startCashCell.textContent = `Starting Cash: $${startingCash}`;
+    }
 }
 
 /**
