@@ -500,8 +500,8 @@ function updateLOCLimit() {
     const locLimitValue = document.getElementById('loc-limit-value');
 
     if (increaseLOCInput && locLimitValue) {
-        // Parse the value from the input, removing $ and commas
-        const increaseValue = parseFloat(increaseLOCInput.value.replace(/[$,]/g, '')) || 0;
+        // Parse the value from the input, handling accounting format
+        const increaseValue = parseAccountingNumber(increaseLOCInput.value);
         const newLOCLimit = baseLOCLimit + increaseValue;
         locLimitValue.textContent = '$' + newLOCLimit.toFixed(0);
     }
@@ -621,24 +621,25 @@ document.addEventListener('DOMContentLoaded', function() {
     const increaseLOCInput = document.getElementById('increaseLOC');
     if (increaseLOCInput) {
         increaseLOCInput.addEventListener('input', function() {
-            increaseLOCValue = parseFloat(this.value.replace(/[$,]/g, '')) || 0;
+            increaseLOCValue = parseAccountingNumber(this.value);
             updateLOCLimit();
             updateDashboard(); // Recalculate with new LOC limit
         });
         increaseLOCInput.addEventListener('change', function() {
-            increaseLOCValue = parseFloat(this.value.replace(/[$,]/g, '')) || 0;
+            increaseLOCValue = parseAccountingNumber(this.value);
             updateLOCLimit();
         });
     }
 
     // Listen for CFO Lever changes
     document.getElementById('cutOpex')?.addEventListener('change', function(e) {
-        cutOpExValue = parseFloat(e.target.value.replace(/[$,]/g, '')) || 0;
+        cutOpExValue = parseAccountingNumber(e.target.value);
         updateDashboard();
     });
 
     document.getElementById('collectAR')?.addEventListener('change', function(e) {
-        collectARValue = parseFloat(e.target.value.replace(/[$,]/g, '')) || 0;
+        collectARValue = parseAccountingNumber(e.target.value);
+        console.log('Collect A/R changed to:', e.target.value, '→ Parsed as:', collectARValue);
         updateDashboard();
     });
 
@@ -646,9 +647,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const lineOfCreditCurrentInput = document.getElementById('lineOfCreditCurrent');
     if (lineOfCreditCurrentInput) {
         lineOfCreditCurrentInput.addEventListener('input', function() {
-            const locValue = parseFloat(this.value.replace(/[$,]/g, '')) || 0;
-            // Update the base LOC limit
-            baseLOCLimit = locValue;
+            baseLOCLimit = parseAccountingNumber(this.value);
             updateLOCLimit();
             updateDashboard();
         });
@@ -658,8 +657,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const beginningCashInput = document.getElementById('beginningCash');
     if (beginningCashInput) {
         beginningCashInput.addEventListener('input', function() {
-            const cashValue = parseFloat(this.value.replace(/[$,]/g, '')) || 0;
-            startingCash = cashValue;
+            startingCash = parseAccountingNumber(this.value);
             updateDashboard();
         });
     }
@@ -668,7 +666,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const fixedExpGrowthInput = document.getElementById('fixedExpGrowth');
     if (fixedExpGrowthInput) {
         fixedExpGrowthInput.addEventListener('input', function() {
-            fixedExpGrowth = parseFloat(this.value.replace(/[$,]/g, '')) || 0;
+            fixedExpGrowth = parseAccountingNumber(this.value);
             updateDashboard();
         });
     }
@@ -677,7 +675,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const loanPaymentInput = document.getElementById('loanPayment');
     if (loanPaymentInput) {
         loanPaymentInput.addEventListener('input', function() {
-            loanPayment = parseFloat(this.value.replace(/[$,]/g, '')) || 0;
+            loanPayment = parseAccountingNumber(this.value);
             updateDashboard();
         });
     }
@@ -781,6 +779,34 @@ let loanPayment = 50; // $50k loan payment in month 3
 let calculationEngine = 'submitted';
 
 // === Mathematical Helper Functions ===
+
+/**
+ * Parses a number in accounting format (handles parentheses as negative)
+ * @param {string} value - The string value to parse (e.g., "($100)", "$50", "-25")
+ * @returns {number} The parsed number value
+ */
+function parseAccountingNumber(value) {
+    if (!value) return 0;
+
+    // Convert to string and trim
+    let str = String(value).trim();
+
+    // Check if wrapped in parentheses (accounting format for negative)
+    const isNegative = str.startsWith('(') && str.endsWith(')');
+
+    // Remove parentheses, dollar signs, and commas
+    str = str.replace(/[$,()]/g, '');
+
+    // Parse the number
+    let num = parseFloat(str);
+
+    // Apply negative sign if it was in parentheses
+    if (isNegative && !isNaN(num)) {
+        num = -num;
+    }
+
+    return isNaN(num) ? 0 : num;
+}
 
 // Helper Math Functions
 function mod(x, y) { return x % y; }
@@ -1240,6 +1266,9 @@ function calculateTrialCashPosition(trialNum, month) {
 
     // Add Collect A/R to Month 3 revenue ONLY (matches Excel E13 formula)
     if (month === 3) {
+        if (trialNum === 1) {
+            console.log(`Month 3, Trial 1: Base revenue=${revenue}, collectARValue=${collectARValue}, Final revenue=${revenue + collectARValue}`);
+        }
         revenue += collectARValue;
     }
 
@@ -1282,12 +1311,14 @@ function calculateTrialCashPosition(trialNum, month) {
     const cashFlow = revenue - totalOpEx - debtPayment;
 
     // Get starting cash for this month (cumulative from previous months)
+    // IMPORTANT: Use cashPosition (before line draws), NOT endingCash (after line draws)
+    // This matches Excel's G35 = F35 + G33 formula
     let startCash = startingCash;
     if (month > 1) {
         // Need to calculate cumulative cash from previous months
         for (let m = 1; m < month; m++) {
             const prevMonth = calculateTrialCashPosition(trialNum, m);
-            startCash = prevMonth.endingCash;
+            startCash = prevMonth.cashPosition;  // Use position, not endingCash!
         }
     }
 
