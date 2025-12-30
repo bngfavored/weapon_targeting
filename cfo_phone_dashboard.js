@@ -343,10 +343,10 @@ function initChart() {
             data: data,
             borderColor: getPathColor(i, numCurves),
             backgroundColor: 'transparent',
-            borderWidth: 2,
+            borderWidth: 1,
             tension: 0.3,
-            pointRadius: 2,
-            pointHoverRadius: 4,
+            pointRadius: 1,
+            pointHoverRadius: 2,
             pointBackgroundColor: getPathColor(i, numCurves),
         });
     }
@@ -364,6 +364,14 @@ function initChart() {
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            layout: {
+                padding: {
+                    top: 5,
+                    right: 5,
+                    bottom: 5,
+                    left: 5
+                }
+            },
             interaction: {
                 mode: 'index',
                 intersect: false,
