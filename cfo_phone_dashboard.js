@@ -1684,6 +1684,12 @@ function updateSimulatedResults(results, selectedMonth) {
         updateCell('simulated-linedraw-mo1', results.month1.avgLineDraw);
         updateCell('simulated-chance-loc-mo1', results.month1.chanceLOCDraw, false);
         updateCell('simulated-chance-cash-mo1', results.month1.chanceCashNegative, false);
+        // Force red styling for Chance Cash < $0
+        const cashCell1 = document.getElementById('simulated-chance-cash-mo1');
+        if (cashCell1) {
+            cashCell1.classList.remove('value-highlight', 'value-neutral');
+            cashCell1.classList.add('value-warning');
+        }
     }
 
     // Month 2
@@ -1692,6 +1698,12 @@ function updateSimulatedResults(results, selectedMonth) {
         updateCell('simulated-linedraw-mo2', results.month2.avgLineDraw);
         updateCell('simulated-chance-loc-mo2', results.month2.chanceLOCDraw, false);
         updateCell('simulated-chance-cash-mo2', results.month2.chanceCashNegative, false);
+        // Force red styling for Chance Cash < $0
+        const cashCell2 = document.getElementById('simulated-chance-cash-mo2');
+        if (cashCell2) {
+            cashCell2.classList.remove('value-highlight', 'value-neutral');
+            cashCell2.classList.add('value-warning');
+        }
     }
 
     // Month 3
@@ -1700,6 +1712,12 @@ function updateSimulatedResults(results, selectedMonth) {
         updateCell('simulated-linedraw-mo3', results.month3.avgLineDraw);
         updateCell('simulated-chance-loc-mo3', results.month3.chanceLOCDraw, false);
         updateCell('simulated-chance-cash-mo3', results.month3.chanceCashNegative, false);
+        // Force red styling for Chance Cash < $0
+        const cashCell3 = document.getElementById('simulated-chance-cash-mo3');
+        if (cashCell3) {
+            cashCell3.classList.remove('value-highlight', 'value-neutral');
+            cashCell3.classList.add('value-warning');
+        }
     }
 }
 

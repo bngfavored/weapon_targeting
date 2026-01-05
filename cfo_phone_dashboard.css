@@ -730,8 +730,8 @@ select:focus {
     display: block;
 }
 
-/* Show submitted by default */
-.card-submitted {
+/* Show chart by default */
+.card-chart {
     display: block;
 }
 

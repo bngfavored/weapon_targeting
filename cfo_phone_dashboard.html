@@ -89,16 +89,16 @@
                                 <select id="periodSelect">
                                     <option value="1">Month 1</option>
                                     <option value="2">Month 2</option>
-                                    <option value="3" selected>Month 3</option>
-                                    <option value="quarter">Quarter</option>
+                                    <option value="3">Month 3</option>
+                                    <option value="quarter" selected>Quarter</option>
                                 </select>
                             </div>
                         </div>
                         <div class="control-section">
                             <label class="control-section-label">Calculation Engine</label>
                             <div class="engine-toggle">
-                                <button class="engine-toggle-btn active" data-engine="submitted">Submitted</button>
-                                <button class="engine-toggle-btn" data-engine="chanceplan">ChancePlan</button>
+                                <button class="engine-toggle-btn active" data-engine="submitted">Static</button>
+                                <button class="engine-toggle-btn" data-engine="chanceplan">Stochastic</button>
                             </div>
                         </div>
                     </div>
@@ -170,9 +170,9 @@
                 <!-- Card Selector for Mobile -->
                 <div class="card-selector">
                     <div class="selector-toggle">
-                        <button class="selector-toggle-btn active" data-card="submitted">Pro Forma</button>
+                        <button class="selector-toggle-btn active" data-card="chart">Chart</button>
+                        <button class="selector-toggle-btn" data-card="submitted">Pro Forma</button>
                         <button class="selector-toggle-btn" data-card="simulated">Cash Flow</button>
-                        <button class="selector-toggle-btn" data-card="chart">Chart</button>
                     </div>
                 </div>
 
@@ -220,7 +220,7 @@
                                     <td colspan="4" id="submitted-starting-cash">Starting Cash: $50</td>
                                 </tr>
                                 <tr>
-                                    <td>Cash</td>
+                                    <td><strong>Cash</strong></td>
                                     <td id="submitted-cash-mo1">$62</td>
                                     <td id="submitted-cash-mo2">$82</td>
                                     <td id="submitted-cash-mo3">$60</td>
@@ -239,7 +239,7 @@
                 <!-- Simulated Cash Flow Results -->
                 <div class="card card-simulated">
                     <div class="card-header">
-                        <span class="card-title">Simulated Cash Flow Results</span>
+                        <span class="card-title">Cash Flow</span>
                     </div>
                     <div class="table-wrapper">
                         <table class="data-table">
@@ -253,7 +253,7 @@
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td>Cash</td>
+                                    <td><strong>Cash</strong></td>
                                     <td id="simulated-cash-mo1">$62</td>
                                     <td id="simulated-cash-mo2">$82</td>
                                     <td id="simulated-cash-mo3">$62</td>
