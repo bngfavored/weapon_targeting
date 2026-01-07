@@ -1338,6 +1338,44 @@ select:focus {
     }
 }
 
+/* ========== GALAXY S23 AND SIMILAR PHONES (max-width: 360px) ========== */
+@media (max-width: 360px) {
+    .gauge-wrapper {
+        width: 145px;
+        height: 145px;
+    }
+
+    .gauge-center img {
+        width: 90px;
+        height: 90px;
+    }
+
+    .gauge-value {
+        font-size: 17px;
+    }
+
+    .gauge-pointer-value {
+        font-size: 11px;
+    }
+
+    .gauge-label {
+        font-size: 7px;
+    }
+
+    .gauge-subtitle-value {
+        font-size: 9px;
+    }
+
+    .gauge-subtitle-label {
+        font-size: 7px;
+    }
+
+    .gauge-pointer-container {
+        margin-top: 6px;
+        padding: 0 6px;
+    }
+}
+
 /* ========== DESKTOP STYLES (min-width: 768px) ========== */
 @media (min-width: 768px) {
     .container {
