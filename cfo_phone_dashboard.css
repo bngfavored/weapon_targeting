@@ -1340,22 +1340,59 @@ select:focus {
 
 /* ========== GALAXY S23 AND SIMILAR PHONES (max-width: 360px) ========== */
 @media (max-width: 360px) {
+    .container {
+        padding: 6px;
+    }
+
+    .header {
+        margin-bottom: 6px;
+        padding-bottom: 6px;
+    }
+
+    .card {
+        padding: 8px;
+        margin-bottom: 6px;
+    }
+
+    .controls-card {
+        padding: 8px;
+        margin-bottom: 6px;
+    }
+
+    .combined-card {
+        padding: 6px;
+        margin-bottom: 6px;
+    }
+
+    .card-header {
+        margin-bottom: 6px;
+        padding-bottom: 6px;
+    }
+
+    .combined-content {
+        gap: 6px;
+    }
+
+    .gauge-container {
+        padding: 2px 0;
+    }
+
     .gauge-wrapper {
-        width: 145px;
-        height: 145px;
+        width: 160px;
+        height: 160px;
     }
 
     .gauge-center img {
-        width: 90px;
-        height: 90px;
+        width: 98px;
+        height: 98px;
     }
 
     .gauge-value {
-        font-size: 17px;
+        font-size: 18px;
     }
 
     .gauge-pointer-value {
-        font-size: 11px;
+        font-size: 12px;
     }
 
     .gauge-label {
@@ -1371,8 +1408,40 @@ select:focus {
     }
 
     .gauge-pointer-container {
-        margin-top: 6px;
+        margin-top: 4px;
         padding: 0 6px;
+    }
+
+    .lever-row {
+        padding: 3px 0;
+    }
+
+    .loc-limit {
+        margin-top: 4px;
+        padding: 5px 6px;
+    }
+
+    .chart-wrapper {
+        height: 200px;
+        margin-top: 6px;
+    }
+
+    .card-selector {
+        margin-bottom: 6px;
+    }
+
+    .logo-icon {
+        width: 30px;
+        height: 30px;
+        font-size: 12px;
+    }
+
+    .logo-text {
+        font-size: 14px;
+    }
+
+    .logo img {
+        height: 50px !important;
     }
 }
 
