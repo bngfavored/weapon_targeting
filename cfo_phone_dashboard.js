@@ -388,18 +388,7 @@ function initChart() {
                     display: false
                 },
                 tooltip: {
-                    backgroundColor: 'rgba(26, 35, 50, 0.95)',
-                    titleColor: '#f1f5f9',
-                    bodyColor: '#94a3b8',
-                    borderColor: 'rgba(148, 163, 184, 0.2)',
-                    borderWidth: 1,
-                    padding: 10,
-                    displayColors: true,
-                    callbacks: {
-                        label: function(context) {
-                            return `${context.dataset.label}: $${context.raw}`;
-                        }
-                    }
+                    enabled: false
                 }
             },
             scales: {
@@ -1744,3 +1733,16 @@ function evaluateCondition(value, operator, target) {
             return false;
     }
 }
+
+// Viewport Display for debugging
+function updateViewportDisplay() {
+    const display = document.getElementById('viewportDisplay');
+    if (display) {
+        display.textContent = `${window.innerWidth}px × ${window.innerHeight}px`;
+    }
+}
+
+// Update on load and resize
+window.addEventListener('load', updateViewportDisplay);
+window.addEventListener('resize', updateViewportDisplay);
+updateViewportDisplay();
