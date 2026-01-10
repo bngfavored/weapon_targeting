@@ -373,10 +373,10 @@ function initChart() {
             maintainAspectRatio: false,
             layout: {
                 padding: {
-                    top: 5,
-                    right: 5,
-                    bottom: 5,
-                    left: 5
+                    top: 3,
+                    right: 3,
+                    bottom: 3,
+                    left: 3
                 }
             },
             interaction: {

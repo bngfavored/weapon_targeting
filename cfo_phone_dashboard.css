@@ -624,7 +624,7 @@ select:focus {
     display: flex;
     flex-direction: column;
     gap: 8px;
-    margin-bottom: 10px;
+    margin-bottom: 5px;
     padding-bottom: 8px;
     border-bottom: 1px solid var(--border-color);
 }
@@ -1071,10 +1071,10 @@ select:focus {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 6px 8px;
+    padding: 4px 6px;
     background: var(--bg-secondary);
     border-radius: var(--radius-sm);
-    margin-top: 6px;
+    margin-top: 4px;
 }
 
 .loc-label {
@@ -1234,7 +1234,7 @@ select:focus {
     position: relative;
     width: 100%;
     height: 250px;
-    margin-top: 10px;
+    margin-top: 5px;
 }
 
 .starting-cash {
@@ -1341,50 +1341,50 @@ select:focus {
 /* ========== GALAXY S23 AND SIMILAR PHONES (max-width: 360px) ========== */
 @media (max-width: 360px) {
     .container {
-        padding: 6px;
+        padding: 5px;
     }
 
     .header {
-        margin-bottom: 6px;
-        padding-bottom: 6px;
+        margin-bottom: 5px;
+        padding-bottom: 5px;
     }
 
     .card {
-        padding: 8px;
-        margin-bottom: 6px;
+        padding: 7px;
+        margin-bottom: 5px;
     }
 
     .controls-card {
-        padding: 8px;
-        margin-bottom: 6px;
+        padding: 7px;
+        margin-bottom: 5px;
     }
 
     .combined-card {
-        padding: 6px;
-        margin-bottom: 6px;
+        padding: 5px;
+        margin-bottom: 5px;
     }
 
     .card-header {
-        margin-bottom: 6px;
-        padding-bottom: 6px;
+        margin-bottom: 4px;
+        padding-bottom: 5px;
     }
 
     .combined-content {
-        gap: 6px;
+        gap: 5px;
     }
 
     .gauge-container {
-        padding: 2px 0;
+        padding: 1px 0;
     }
 
     .gauge-wrapper {
-        width: 160px;
-        height: 160px;
+        width: 150px;
+        height: 150px;
     }
 
     .gauge-center img {
-        width: 98px;
-        height: 98px;
+        width: 92px;
+        height: 92px;
     }
 
     .gauge-value {
@@ -1413,21 +1413,25 @@ select:focus {
     }
 
     .lever-row {
-        padding: 3px 0;
+        padding: 2px 0;
     }
 
     .loc-limit {
-        margin-top: 4px;
-        padding: 5px 6px;
+        margin-top: 2px;
+        padding: 3px 5px;
     }
 
     .chart-wrapper {
-        height: 200px;
-        margin-top: 6px;
+        height: 190px;
+        margin-top: 5px;
     }
 
     .card-selector {
-        margin-bottom: 6px;
+        margin-bottom: 5px;
+    }
+
+    .controls-grid {
+        gap: 10px;
     }
 
     .logo-icon {
@@ -1442,6 +1446,161 @@ select:focus {
 
     .logo img {
         height: 50px !important;
+    }
+
+    .number-input input {
+        padding: 6px 5px;
+        font-size: 12px;
+        min-width: 40px;
+    }
+
+    .number-btn button {
+        padding: 4px 8px;
+        font-size: 9px;
+    }
+
+    .card-chart .card-header {
+        margin-bottom: 3px;
+        padding-bottom: 5px;
+    }
+
+    .card-chart .chart-wrapper {
+        margin-top: 3px;
+    }
+}
+
+/* ========== COMPRESSED LAYOUT FOR BROWSER CHROME (max-height: 700px) ========== */
+@media (max-width: 360px) and (max-height: 740px) {
+    .container {
+        padding: 5px;
+    }
+
+    .header {
+        margin-bottom: 5px;
+        padding-bottom: 5px;
+    }
+
+    .card, .controls-card {
+        padding: 7px;
+        margin-bottom: 5px;
+    }
+
+    .combined-card {
+        padding: 5px;
+        margin-bottom: 5px;
+    }
+
+    .combined-content {
+        gap: 5px;
+    }
+
+    .gauge-wrapper {
+        width: 145px;
+        height: 145px;
+    }
+
+    .gauge-center img {
+        width: 88px;
+        height: 88px;
+    }
+
+    .chart-wrapper {
+        height: 180px;
+        margin-top: 5px;
+    }
+
+    .card-header {
+        margin-bottom: 5px;
+        padding-bottom: 5px;
+    }
+
+    .controls-grid {
+        gap: 10px;
+    }
+
+    .card-chart .card-header {
+        margin-bottom: 0px;
+        padding-bottom: 3px;
+    }
+
+    .card-chart .chart-wrapper {
+        margin-top: 0px;
+    }
+}
+
+/* ========== VERY COMPRESSED LAYOUT (max-height: 650px) ========== */
+@media (max-width: 360px) and (max-height: 650px) {
+    .container {
+        padding: 4px;
+    }
+
+    .header {
+        margin-bottom: 4px;
+        padding-bottom: 4px;
+    }
+
+    .card, .controls-card {
+        padding: 6px;
+        margin-bottom: 4px;
+    }
+
+    .combined-card {
+        padding: 4px;
+        margin-bottom: 4px;
+    }
+
+    .combined-content {
+        gap: 4px;
+    }
+
+    .gauge-wrapper {
+        width: 130px;
+        height: 130px;
+    }
+
+    .gauge-center img {
+        width: 78px;
+        height: 78px;
+    }
+
+    .gauge-value {
+        font-size: 16px;
+    }
+
+    .gauge-pointer-value {
+        font-size: 10px;
+    }
+
+    .chart-wrapper {
+        height: 160px;
+        margin-top: 4px;
+    }
+
+    .card-header {
+        margin-bottom: 4px;
+        padding-bottom: 4px;
+    }
+
+    .controls-grid {
+        gap: 8px;
+    }
+
+    .lever-row {
+        padding: 2px 0;
+    }
+
+    .loc-limit {
+        margin-top: 2px;
+        padding: 3px 4px;
+    }
+
+    .card-chart .card-header {
+        margin-bottom: 0px;
+        padding-bottom: 2px;
+    }
+
+    .card-chart .chart-wrapper {
+        margin-top: 0px;
     }
 }
 
@@ -1603,7 +1762,17 @@ select:focus {
     }
 }
 
-/* Scrollbar */
+/* ========== 700px BREAKPOINT ========== */
+@media (max-width: 700px) {
+    .card-header {
+        margin-bottom: 0px;
+    }
+    .chart-wrapper {
+        margin-top: 0px;
+    }
+}
+
+ /* Scrollbar */
 ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
