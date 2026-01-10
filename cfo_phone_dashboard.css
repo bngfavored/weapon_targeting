@@ -1177,6 +1177,7 @@ select:focus {
     text-transform: uppercase;
     letter-spacing: 0.5px;
     color: var(--text-muted);
+    white-space: nowrap;
 }
 
 .number-input {
@@ -1686,17 +1687,30 @@ select:focus {
     }
 
     .gauge-wrapper {
-        width: 224px;
-        height: 224px;
+        width: 200px;
+        height: 200px;
     }
 
     .gauge-center img {
-        width: 140px;
-        height: 140px;
+        width: 125px;
+        height: 125px;
     }
 
     .chart-wrapper {
         height: 320px;
+    }
+
+    .lever-input {
+        width: 100px;
+    }
+
+    .number-input {
+        flex: 0 0 auto;
+    }
+
+    .number-input input {
+        min-width: 100px;
+        width: 100px;
     }
 }
 
@@ -1744,17 +1758,17 @@ select:focus {
     }
 
     .gauge-wrapper {
-        width: 238px;
-        height: 238px;
+        width: 200px;
+        height: 200px;
     }
 
     .gauge-center img {
-        width: 150px;
-        height: 150px;
+        width: 125px;
+        height: 125px;
     }
 
     .gauge-value {
-        font-size: 24px;
+        font-size: 22px;
     }
 
     .chart-wrapper {
