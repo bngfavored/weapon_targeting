@@ -1437,7 +1437,8 @@ function runMonteCarloSimulation(selectedMonth) {
     const results = {
         month1: { cash: [], lineDraw: [], chanceLOCDraw: 0, chanceCashNegative: 0 },
         month2: { cash: [], lineDraw: [], chanceLOCDraw: 0, chanceCashNegative: 0 },
-        month3: { cash: [], lineDraw: [], chanceLOCDraw: 0, chanceCashNegative: 0 }
+        month3: { cash: [], lineDraw: [], chanceLOCDraw: 0, chanceCashNegative: 0 },
+        quarter: { chanceOfLoss: 0 }
     };
 
     // Run trials (matches Excel PMTable rows 4-10003)
@@ -1476,6 +1477,18 @@ function runMonteCarloSimulation(selectedMonth) {
             (cashArray.filter(c => c >= 0).length / maxTrials) * 100;
     }
 
+    // Calculate Chance of Loss in Quarter (matches Excel PMTable U4 and ChanceGraphs H9)
+    // This is the probability that AT LEAST ONE month has negative ending cash
+    let trialsWithAtLeastOneLoss = 0;
+    for (let trial = 0; trial < maxTrials; trial++) {
+        if (results.month1.cash[trial] < 0 ||
+            results.month2.cash[trial] < 0 ||
+            results.month3.cash[trial] < 0) {
+            trialsWithAtLeastOneLoss++;
+        }
+    }
+    results.quarter.chanceOfLoss = (trialsWithAtLeastOneLoss / maxTrials) * 100;
+
     return results;
 }
 
@@ -1505,10 +1518,19 @@ function updateDashboard() {
 
     console.log("Simulation complete:", results);
 
-    // Update gauge/chance meter for selected month
-    const monthKey = `month${selectedMonth}`;
-    if (results[monthKey]) {
-        updateGauge(results[monthKey].chanceCashPositive);
+    // Update gauge/chance meter
+    // If "Quarter" is selected, show quarter-level metric (Chance of Loss in Quarter)
+    // Otherwise, show the selected month's individual metric
+    if (periodSelect?.value === 'quarter' && results.quarter) {
+        // For quarter view, show the inverse of chanceOfLoss (i.e., chance of NO loss in quarter)
+        const chanceNoLossInQuarter = 100 - results.quarter.chanceOfLoss;
+        updateGauge(chanceNoLossInQuarter);
+    } else {
+        // For individual month selection, show that month's chance of positive cash
+        const monthKey = `month${selectedMonth}`;
+        if (results[monthKey]) {
+            updateGauge(results[monthKey].chanceCashPositive);
+        }
     }
 
     // Update Submitted Forecast table (deterministic values using median/mean)
@@ -1706,6 +1728,17 @@ function updateSimulatedResults(results, selectedMonth) {
         if (cashCell3) {
             cashCell3.classList.remove('value-highlight', 'value-neutral');
             cashCell3.classList.add('value-warning');
+        }
+    }
+
+    // Update Chance of Loss in Quarter (quarter-level metric)
+    if (results.quarter) {
+        updateCell('simulated-chance-quarter', results.quarter.chanceOfLoss, false);
+        // Force red styling for quarter metric
+        const quarterCell = document.getElementById('simulated-chance-quarter');
+        if (quarterCell) {
+            quarterCell.classList.remove('value-highlight', 'value-neutral');
+            quarterCell.classList.add('value-warning');
         }
     }
 }
