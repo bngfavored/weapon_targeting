@@ -234,8 +234,8 @@ function updateHistogramChart(capabilities) {
 // === Event Listeners ===
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize theme (default to dark)
-    document.documentElement.setAttribute('data-theme', 'dark');
+    // Initialize theme (default to light)
+    document.documentElement.setAttribute('data-theme', 'light');
     document.documentElement.setAttribute('data-font-size', 'medium');
 
     // Settings dropdown toggle

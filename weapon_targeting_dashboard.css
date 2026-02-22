@@ -1,22 +1,22 @@
 :root {
-    /* Light Theme (default) */
-    --bg-primary: #f8fafc;
-    --bg-secondary: #f1f5f9;
-    --bg-card: #ffffff;
-    --bg-card-hover: #f8fafc;
-    --accent-green: #10b981;
-    --accent-green-dim: rgba(16, 185, 129, 0.1);
-    --accent-red: #ef4444;
-    --accent-red-dim: rgba(239, 68, 68, 0.1);
-    --accent-blue: #3b82f6;
-    --accent-amber: #f59e0b;
-    --text-primary: #0f172a;
-    --text-secondary: #475569;
-    --text-muted: #94a3b8;
-    --border-color: rgba(148, 163, 184, 0.2);
-    --border-color-hover: rgba(148, 163, 184, 0.3);
-    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
-    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.1);
+    /* Light Theme (default) - Darker Green Hue */
+    --bg-primary: #e8f5e9;
+    --bg-secondary: #c8e6c9;
+    --bg-card: #f1f8f2;
+    --bg-card-hover: #e8f5e9;
+    --accent-green: #2e7d32;
+    --accent-green-dim: rgba(46, 125, 50, 0.15);
+    --accent-red: #d32f2f;
+    --accent-red-dim: rgba(211, 47, 47, 0.15);
+    --accent-blue: #1976d2;
+    --accent-amber: #f57c00;
+    --text-primary: #1b5e20;
+    --text-secondary: #388e3c;
+    --text-muted: #66bb6a;
+    --border-color: rgba(46, 125, 50, 0.25);
+    --border-color-hover: rgba(46, 125, 50, 0.4);
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.12);
     --radius-sm: 8px;
     --radius-md: 12px;
     --radius-lg: 16px;
