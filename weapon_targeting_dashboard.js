@@ -11,6 +11,7 @@ let effectivenessThreshold = 0.5; // 50%
 let stochasticMode = true;
 const maxTrials = 10000;
 
+
 // === Chart Instances ===
 let histogramChart = null;
 
