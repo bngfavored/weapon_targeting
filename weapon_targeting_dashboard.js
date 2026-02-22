@@ -5,7 +5,7 @@ let trialData = null;
 const averages = [0.687005, 0.553479, 0.503667, 0.503667, 0.5038, 0.5038, 0.551971, 0.689181];
 
 // === Global State ===
-let weaponSelections = [true, false, false, true]; // Default: W1 and W4 selected
+let weaponSelections = [true, false, false, false]; // Default: W1 selected
 let selectedTarget = 1; // 1 or 2
 let effectivenessThreshold = 0.5; // 50%
 let stochasticMode = true;
@@ -105,23 +105,58 @@ function runSimulation() {
  * Create histogram bins from capability data
  */
 function createHistogramData(capabilities) {
-    const numBins = 10;
+    const numBins = 100; // 100 bins for 1% increments
     const bins = new Array(numBins).fill(0);
-    const binWidth = 1 / numBins; // 0.1 = 10%
+    const binWidth = 0.01; // Each bin covers 1%
 
     for (const cap of capabilities) {
         const binIndex = Math.min(Math.floor(cap / binWidth), numBins - 1);
         bins[binIndex]++;
     }
 
+    // Group into 10 display bins (0-10%, 10-20%, etc.) by summing every 10 bins
+    const displayBins = [];
+    for (let i = 0; i < 10; i++) {
+        let sum = 0;
+        for (let j = 0; j < 10; j++) {
+            sum += bins[i * 10 + j];
+        }
+        displayBins.push(sum);
+    }
+
     // Convert to percentages
     const total = capabilities.length;
-    return bins.map(count => (count / total) * 100);
+    return displayBins.map(count => (count / total) * 100);
 }
 
 // === UI Update Functions ===
 
 function updateDashboard() {
+    // Sync UI state with variables to ensure consistency
+    const targetSelect = document.getElementById('targetSelect');
+    if (targetSelect) {
+        selectedTarget = parseInt(targetSelect.value);
+    }
+    const activeEngine = document.querySelector('.engine-toggle-btn.active');
+    if (activeEngine) {
+        stochasticMode = activeEngine.dataset.engine === 'stochastic';
+    }
+    const thresholdInput = document.getElementById('thresholdInput');
+    if (thresholdInput) {
+        const value = thresholdInput.value.replace('%', '').trim();
+        const num = parseFloat(value);
+        if (!isNaN(num) && num >= 0 && num <= 100) {
+            effectivenessThreshold = num / 100;
+        }
+    }
+    document.querySelectorAll('.weapon-checkbox').forEach(checkbox => {
+        const weaponNum = parseInt(checkbox.dataset.weapon);
+        const input = checkbox.querySelector('input');
+        if (input) {
+            weaponSelections[weaponNum - 1] = input.checked;
+        }
+    });
+
     // Run simulation
     const results = runSimulation();
 
@@ -167,10 +202,10 @@ function updateHistogramChart(capabilities) {
     const histData = createHistogramData(capabilities);
     const labels = ['0%', '10%', '20%', '30%', '40%', '50%', '60%', '70%', '80%', '90%'];
 
+    // Destroy existing chart to force complete rebuild
     if (histogramChart) {
-        histogramChart.data.datasets[0].data = histData;
-        histogramChart.update();
-        return;
+        histogramChart.destroy();
+        histogramChart = null;
     }
 
     histogramChart = new Chart(ctx, {
@@ -212,7 +247,7 @@ function updateHistogramChart(capabilities) {
                             return value + '%';
                         }
                     },
-                    max: 50
+                    suggestedMax: 100
                 }
             },
             plugins: {

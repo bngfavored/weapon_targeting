@@ -1,20 +1,20 @@
 :root {
-    /* Light Theme (default) - Darker Green Hue */
-    --bg-primary: #e8f5e9;
-    --bg-secondary: #c8e6c9;
-    --bg-card: #f1f8f2;
-    --bg-card-hover: #e8f5e9;
-    --accent-green: #2e7d32;
-    --accent-green-dim: rgba(46, 125, 50, 0.15);
+    /* Light Theme (default) - Blue Hue from Logo */
+    --bg-primary: #e3f2fd;
+    --bg-secondary: #bbdefb;
+    --bg-card: #f5f9fc;
+    --bg-card-hover: #e3f2fd;
+    --accent-green: #2B5F93;
+    --accent-green-dim: rgba(43, 95, 147, 0.15);
     --accent-red: #d32f2f;
     --accent-red-dim: rgba(211, 47, 47, 0.15);
-    --accent-blue: #1976d2;
+    --accent-blue: #2B5F93;
     --accent-amber: #f57c00;
-    --text-primary: #1b5e20;
-    --text-secondary: #388e3c;
-    --text-muted: #66bb6a;
-    --border-color: rgba(46, 125, 50, 0.25);
-    --border-color-hover: rgba(46, 125, 50, 0.4);
+    --text-primary: #1E4976;
+    --text-secondary: #2B5F93;
+    --text-muted: #5A9BD5;
+    --border-color: rgba(43, 95, 147, 0.25);
+    --border-color-hover: rgba(43, 95, 147, 0.4);
     --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
     --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.12);
     --radius-sm: 8px;
@@ -23,13 +23,13 @@
 }
 
 [data-theme="dark"] {
-    /* Military/Tactical Dark Theme */
-    --bg-primary: #0a0f0a;
-    --bg-secondary: #111a11;
-    --bg-card: #1a2a1a;
-    --bg-card-hover: #1f2f1f;
-    --accent-green: #4ade80;
-    --accent-green-dim: rgba(74, 222, 128, 0.15);
+    /* Military/Tactical Dark Theme - Blue Accent */
+    --bg-primary: #0a0f14;
+    --bg-secondary: #111a22;
+    --bg-card: #1a2a36;
+    --bg-card-hover: #1f2f3f;
+    --accent-green: #60a5fa;
+    --accent-green-dim: rgba(96, 165, 250, 0.15);
     --accent-red: #f87171;
     --accent-red-dim: rgba(248, 113, 113, 0.15);
     --accent-blue: #60a5fa;
@@ -37,8 +37,8 @@
     --text-primary: #e2e8f0;
     --text-secondary: #94a3b8;
     --text-muted: #64748b;
-    --border-color: rgba(74, 222, 128, 0.2);
-    --border-color-hover: rgba(74, 222, 128, 0.3);
+    --border-color: rgba(96, 165, 250, 0.2);
+    --border-color-hover: rgba(96, 165, 250, 0.3);
     --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
     --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
 }
