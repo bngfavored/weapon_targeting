@@ -12,10 +12,11 @@
     <div class="container">
         <!-- Header -->
         <div class="header">
-            <a href="https://www.chanceplan.ai" class="logo" target="_blank">
-                <span class="logo-text">Weapon Targeting Dashboard</span>
-            </a>
-            <a href="Help.pdf" class="help-btn" target="_blank">Help</a>
+            <div class="logo">
+                <a href="https://www.chanceplan.ai" target="_blank" rel="noopener noreferrer">
+                    <img src="https://www.chanceplan.ai/s/logo.png" alt="ChancePlan Logo" style="height: 60px; width: auto;">
+                </a>
+            </div>
         </div>
 
         <!-- Controls Bar -->
@@ -31,73 +32,94 @@
                     <option value="2">Target 2</option>
                 </select>
             </div>
-            <label class="stochastic-toggle">
-                <input type="checkbox" id="stochasticToggle" checked>
-                <span class="control-label">STOCHASTIC</span>
-            </label>
+            <div class="control-group">
+                <span class="control-label">Calculation Engine</span>
+                <div class="engine-toggle">
+                    <button class="engine-toggle-btn" data-engine="static">Static</button>
+                    <button class="engine-toggle-btn active" data-engine="stochastic">Stochastic</button>
+                </div>
+            </div>
         </div>
 
         <!-- Main Grid -->
         <div class="main-grid">
-            <!-- Left Column - Weapon Selection -->
-            <div class="card">
-                <div class="card-header">
-                    <span class="card-title">Weapon Selection</span>
-                </div>
+            <!-- Combined Card: Weapon Selection + Mission Success Gauge -->
+            <div class="card combined-card">
+                <div class="combined-content">
+                    <!-- Left: Weapon Selection -->
+                    <div class="weapon-section">
+                        <div class="card-header">
+                            <span class="card-title">Weapon Selection</span>
+                        </div>
 
-                <div class="stat-display">
-                    <div class="stat-label">Average Remaining<br>Combat Effectiveness</div>
-                    <div class="stat-value" id="avgEffectiveness">27%</div>
-                </div>
+                        <div class="stat-display">
+                            <div class="stat-label">Average Remaining<br>Combat Effectiveness</div>
+                            <div class="stat-value" id="avgEffectiveness">27%</div>
+                        </div>
 
-                <div class="weapon-selection">
-                    <div class="weapon-checkbox selected" data-weapon="1">
-                        <input type="checkbox" id="weapon1" checked>
-                        <label for="weapon1">Weapon 1</label>
-                        <span class="weapon-effectiveness" id="eff1">68.7%</span>
+                        <div class="weapon-selection">
+                            <div class="weapon-checkbox selected" data-weapon="1">
+                                <input type="checkbox" id="weapon1" checked>
+                                <label for="weapon1">Weapon 1</label>
+                                <span class="weapon-effectiveness" id="eff1">(68.7%)</span>
+                            </div>
+                            <div class="weapon-checkbox" data-weapon="2">
+                                <input type="checkbox" id="weapon2">
+                                <label for="weapon2">Weapon 2</label>
+                                <span class="weapon-effectiveness" id="eff2">(50.4%)</span>
+                            </div>
+                            <div class="weapon-checkbox" data-weapon="3">
+                                <input type="checkbox" id="weapon3">
+                                <label for="weapon3">Weapon 3</label>
+                                <span class="weapon-effectiveness" id="eff3">(50.4%)</span>
+                            </div>
+                            <div class="weapon-checkbox selected" data-weapon="4">
+                                <input type="checkbox" id="weapon4" checked>
+                                <label for="weapon4">Weapon 4</label>
+                                <span class="weapon-effectiveness" id="eff4">(55.2%)</span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="weapon-checkbox" data-weapon="2">
-                        <input type="checkbox" id="weapon2">
-                        <label for="weapon2">Weapon 2</label>
-                        <span class="weapon-effectiveness" id="eff2">50.4%</span>
-                    </div>
-                    <div class="weapon-checkbox" data-weapon="3">
-                        <input type="checkbox" id="weapon3">
-                        <label for="weapon3">Weapon 3</label>
-                        <span class="weapon-effectiveness" id="eff3">50.4%</span>
-                    </div>
-                    <div class="weapon-checkbox selected" data-weapon="4">
-                        <input type="checkbox" id="weapon4" checked>
-                        <label for="weapon4">Weapon 4</label>
-                        <span class="weapon-effectiveness" id="eff4">55.2%</span>
-                    </div>
-                </div>
-            </div>
 
-            <!-- Middle Column - Gauge -->
-            <div class="card gauge-section">
-                <div class="gauge-title">Mission Success</div>
-                <div class="gauge-container">
-                    <canvas id="gaugeChart" class="gauge-canvas"></canvas>
-                    <div class="gauge-center">
-                        <div class="gauge-center-text">
-                            Chance<br>O<br>meter<sup class="gauge-center-tm">TM</sup>
+                    <!-- Right: Mission Success Gauge -->
+                    <div class="gauge-section">
+                        <div class="gauge-container">
+                            <div class="gauge-wrapper">
+                                <svg class="gauge-svg" viewBox="0 0 120 120" width="100%" height="100%">
+                                    <defs>
+                                        <linearGradient id="gaugeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                            <stop offset="0%" stop-color="#4ade80"/>
+                                            <stop offset="100%" stop-color="#4ade80"/>
+                                        </linearGradient>
+                                    </defs>
+                                    <circle class="gauge-bg" cx="60" cy="60" r="50"
+                                            stroke-dasharray="314.159"
+                                            stroke-dashoffset="0"/>
+                                    <circle class="gauge-fill" cx="60" cy="60" r="50"
+                                            stroke-dasharray="314.159"
+                                            stroke-dashoffset="314.159"
+                                            id="gaugeFill"/>
+                                </svg>
+                                <div class="gauge-center">
+                                    <img src="https://www.chanceplan.ai/s/center-logo.png" alt="ChancePlan Logo">
+                                </div>
+                            </div>
+                            <div class="gauge-pointer-container">
+                                <div class="gauge-pointer gauge-pointer-left">
+                                    <div class="gauge-pointer-value" id="gaugeValue">9.0%</div>
+                                    <div class="gauge-pointer-label">Mission<br>Success</div>
+                                </div>
+                                <div class="gauge-pointer gauge-pointer-right">
+                                    <div class="gauge-pointer-value" id="riskValue">91.0%</div>
+                                    <div class="gauge-pointer-label">Mission<br>Failure</div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="gauge-legend">
-                    <div class="legend-item">
-                        <div class="legend-color yes"></div>
-                        <span class="legend-label">Yes</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color no"></div>
-                        <span class="legend-label">No</span>
-                    </div>
-                </div>
             </div>
 
-            <!-- Right Column - Histogram -->
+            <!-- Histogram -->
             <div class="card histogram-section">
                 <div class="card-header">
                     <span class="card-title">Remaining Combat Effectiveness</span>

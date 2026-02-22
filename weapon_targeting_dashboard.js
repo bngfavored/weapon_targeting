@@ -12,7 +12,6 @@ let stochasticMode = true;
 const maxTrials = 10000;
 
 // === Chart Instances ===
-let gaugeChart = null;
 let histogramChart = null;
 
 // === Data Loading ===
@@ -135,7 +134,7 @@ function updateDashboard() {
         const effEl = document.getElementById(`eff${w}`);
         const idx = (w - 1) * 2 + (selectedTarget - 1);
         const eff = averages[idx];
-        effEl.textContent = (eff * 100).toFixed(1) + '%';
+        effEl.textContent = '(' + (eff * 100).toFixed(1) + '%)';
     }
 
     // Update gauge
@@ -146,73 +145,21 @@ function updateDashboard() {
 }
 
 function updateGaugeChart(successPercent) {
-    const ctx = document.getElementById('gaugeChart').getContext('2d');
+    // Update SVG gauge
+    const gaugeFill = document.getElementById('gaugeFill');
+    const gaugeValue = document.getElementById('gaugeValue');
+    const riskValue = document.getElementById('riskValue');
 
-    if (gaugeChart) {
-        gaugeChart.data.datasets[0].data = [successPercent, 100 - successPercent];
-        gaugeChart.update();
-        return;
-    }
+    // Calculate stroke-dashoffset for the success percentage
+    // Full circle circumference = 2 * PI * r = 2 * 3.14159 * 50 = 314.159
+    const circumference = 314.159;
+    const offset = circumference - (successPercent / 100) * circumference;
 
-    gaugeChart = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: ['Yes', 'No'],
-            datasets: [{
-                data: [successPercent, 100 - successPercent],
-                backgroundColor: ['#4ade80', '#f87171'],
-                borderWidth: 0,
-                cutout: '60%'
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: true,
-            plugins: {
-                legend: {
-                    display: false
-                },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            return context.label + ': ' + context.raw.toFixed(1) + '%';
-                        }
-                    }
-                }
-            }
-        },
-        plugins: [{
-            id: 'centerText',
-            afterDraw: function(chart) {
-                const ctx = chart.ctx;
-                const width = chart.width;
-                const height = chart.height;
+    gaugeFill.style.strokeDashoffset = offset;
 
-                // Draw success percentage on green section
-                const successPct = chart.data.datasets[0].data[0];
-                const failPct = chart.data.datasets[0].data[1];
-
-                ctx.save();
-                ctx.font = 'bold 20px Space Mono';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-
-                // Position text on the segments
-                const centerX = width / 2;
-                const centerY = height / 2;
-                const radius = Math.min(width, height) / 2 * 0.8;
-
-                // Success percentage (top)
-                ctx.fillStyle = '#fff';
-                ctx.fillText(successPct.toFixed(0) + '%', centerX, centerY - radius * 0.5);
-
-                // Failure percentage (bottom)
-                ctx.fillText(failPct.toFixed(0) + '%', centerX, centerY + radius * 0.5);
-
-                ctx.restore();
-            }
-        }]
-    });
+    // Update pointer values
+    gaugeValue.textContent = successPercent.toFixed(1) + '%';
+    riskValue.textContent = (100 - successPercent).toFixed(1) + '%';
 }
 
 function updateHistogramChart(capabilities) {
@@ -326,9 +273,16 @@ document.addEventListener('DOMContentLoaded', function() {
         updateDashboard();
     });
 
-    // Stochastic toggle
-    document.getElementById('stochasticToggle').addEventListener('change', function() {
-        stochasticMode = this.checked;
-        updateDashboard();
+    // Calculation Engine toggle
+    document.querySelectorAll('.engine-toggle-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            // Remove active from all buttons
+            document.querySelectorAll('.engine-toggle-btn').forEach(b => b.classList.remove('active'));
+            // Add active to clicked button
+            this.classList.add('active');
+            // Update stochastic mode
+            stochasticMode = this.dataset.engine === 'stochastic';
+            updateDashboard();
+        });
     });
 });
