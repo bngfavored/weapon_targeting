@@ -132,6 +132,12 @@ function createHistogramData(capabilities) {
 // === UI Update Functions ===
 
 function updateDashboard() {
+    // Sync button states with weaponSelections array
+    document.querySelectorAll('.weapon-btn').forEach(btn => {
+        const weaponNum = parseInt(btn.dataset.weapon);
+        btn.classList.toggle('active', weaponSelections[weaponNum - 1]);
+    });
+
     // Sync UI state with variables to ensure consistency
     const targetSelect = document.getElementById('targetSelect');
     if (targetSelect) {
@@ -149,13 +155,6 @@ function updateDashboard() {
             effectivenessThreshold = num / 100;
         }
     }
-    document.querySelectorAll('.weapon-checkbox').forEach(checkbox => {
-        const weaponNum = parseInt(checkbox.dataset.weapon);
-        const input = checkbox.querySelector('input');
-        if (input) {
-            weaponSelections[weaponNum - 1] = input.checked;
-        }
-    });
 
     // Run simulation
     const results = runSimulation();
@@ -318,22 +317,15 @@ document.addEventListener('DOMContentLoaded', function() {
     // Load trial data
     loadTrialData();
 
-    // Weapon checkboxes
-    document.querySelectorAll('.weapon-checkbox').forEach(checkbox => {
-        const input = checkbox.querySelector('input');
-        const weaponNum = parseInt(checkbox.dataset.weapon);
+    // Weapon buttons
+    document.querySelectorAll('.weapon-btn').forEach(btn => {
+        const weaponNum = parseInt(btn.dataset.weapon);
 
-        input.addEventListener('change', function() {
-            weaponSelections[weaponNum - 1] = this.checked;
-            checkbox.classList.toggle('selected', this.checked);
+        btn.addEventListener('click', function() {
+            // Toggle active state
+            const isActive = btn.classList.toggle('active');
+            weaponSelections[weaponNum - 1] = isActive;
             updateDashboard();
-        });
-
-        checkbox.addEventListener('click', function(e) {
-            if (e.target !== input) {
-                input.checked = !input.checked;
-                input.dispatchEvent(new Event('change'));
-            }
         });
     });
 

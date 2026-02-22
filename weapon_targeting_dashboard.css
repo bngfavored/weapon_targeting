@@ -426,38 +426,42 @@ body {
     color: var(--accent-green);
 }
 
-.weapon-checkbox {
+.weapon-btn {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 10px;
-    padding: 10px;
+    padding: 10px 12px;
     background: var(--bg-secondary);
     border-radius: var(--radius-sm);
     cursor: pointer;
     transition: all 0.2s ease;
-    border: 1px solid transparent;
-}
-
-.weapon-checkbox:hover {
-    border-color: var(--border-color);
-}
-
-.weapon-checkbox.selected {
-    border-color: var(--accent-green);
-    background: var(--accent-green-dim);
-}
-
-.weapon-checkbox input {
-    width: 18px;
-    height: 18px;
-    accent-color: var(--accent-green);
-    cursor: pointer;
-}
-
-.weapon-checkbox label {
+    border: 1px solid var(--border-color);
+    font-family: 'DM Sans', sans-serif;
     font-size: 13px;
     font-weight: 500;
-    cursor: pointer;
+    color: var(--text-secondary);
+    width: 100%;
+    text-align: left;
+}
+
+.weapon-btn:hover {
+    color: var(--text-primary);
+    border-color: var(--border-color-hover);
+}
+
+.weapon-btn.active {
+    background: var(--accent-green);
+    color: white;
+    border-color: var(--accent-green);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.weapon-btn.active .weapon-effectiveness {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.weapon-label {
     flex: 1;
 }
 
@@ -604,17 +608,9 @@ body {
         gap: 6px;
     }
 
-    .weapon-checkbox {
-        padding: 4px 5px;
+    .weapon-btn {
+        padding: 4px 6px;
         gap: 5px;
-    }
-
-    .weapon-checkbox input {
-        width: 13px;
-        height: 13px;
-    }
-
-    .weapon-checkbox label {
         font-size: 10px;
     }
 
@@ -788,17 +784,9 @@ body {
         font-size: 20px;
     }
 
-    .weapon-checkbox {
-        padding: 5px 6px;
+    .weapon-btn {
+        padding: 5px 8px;
         gap: 6px;
-    }
-
-    .weapon-checkbox input {
-        width: 14px;
-        height: 14px;
-    }
-
-    .weapon-checkbox label {
         font-size: 11px;
     }
 
@@ -906,17 +894,9 @@ body {
         font-size: 18px;
     }
 
-    .weapon-checkbox {
-        padding: 4px 5px;
+    .weapon-btn {
+        padding: 4px 6px;
         gap: 5px;
-    }
-
-    .weapon-checkbox input {
-        width: 13px;
-        height: 13px;
-    }
-
-    .weapon-checkbox label {
         font-size: 10px;
     }
 
@@ -1008,17 +988,9 @@ body {
         font-size: 16px;
     }
 
-    .weapon-checkbox {
-        padding: 3px 4px;
+    .weapon-btn {
+        padding: 3px 5px;
         gap: 4px;
-    }
-
-    .weapon-checkbox input {
-        width: 12px;
-        height: 12px;
-    }
-
-    .weapon-checkbox label {
         font-size: 10px;
     }
 
@@ -1156,12 +1128,9 @@ body {
         font-size: 32px;
     }
 
-    .weapon-checkbox {
-        padding: 12px;
+    .weapon-btn {
+        padding: 12px 16px;
         gap: 12px;
-    }
-
-    .weapon-checkbox label {
         font-size: 15px;
     }
 
