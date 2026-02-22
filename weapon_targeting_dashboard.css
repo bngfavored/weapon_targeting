@@ -1221,3 +1221,29 @@ body {
     border-radius: 3px;
 }
 
+  
+/* Help Button */  
+.help-btn {  
+    position: absolute;  
+    left: 50%;  
+    transform: translateX(-50%);  
+    background: var(--bg-card);  
+    border: 1px solid var(--border-color);  
+    border-radius: var(--radius-sm);  
+    padding: 8px 20px;  
+    display: flex;  
+    align-items: center;  
+    justify-content: center;  
+    color: var(--text-primary);  
+    text-decoration: none;  
+    font-family: 'DM Sans', sans-serif;  
+    font-size: 14px;  
+    font-weight: 600;  
+    cursor: pointer;  
+    transition: all 0.2s ease;  
+ }  
+ .help-btn:hover {  
+    background: var(--bg-card-hover);  
+    border-color: var(--border-color-hover);  
+    transform: translateX(-50%) scale(1.02);  
+} 
