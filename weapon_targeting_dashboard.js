@@ -8,7 +8,7 @@ const averages = [0.687005, 0.553479, 0.503667, 0.503667, 0.5038, 0.5038, 0.5519
 let weaponSelections = [true, false, false, false]; // Default: W1 selected
 let selectedTarget = 1; // 1 or 2
 let effectivenessThreshold = 0.5; // 50%
-let stochasticMode = true;
+let stochasticMode = false;
 const maxTrials = 10000;
 
 
@@ -111,13 +111,14 @@ function createHistogramData(capabilities) {
     const binWidth = 0.01; // Each bin covers 1%
 
     for (const cap of capabilities) {
+        // Cap values at 1.0 (100%) to ensure they fit within 100 bins (0-1% through 99-100%)
         const binIndex = Math.min(Math.floor(cap / binWidth), numBins - 1);
         bins[binIndex]++;
     }
 
-    // Group into 10 display bins (0-10%, 10-20%, etc.) by summing every 10 bins
+    // Group into 11 display bins (0-10%, 10-20%, ..., 90-100%) by summing every 10 bins
     const displayBins = [];
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 11; i++) {
         let sum = 0;
         for (let j = 0; j < 10; j++) {
             sum += bins[i * 10 + j];
@@ -200,7 +201,10 @@ function updateGaugeChart(successPercent) {
 function updateHistogramChart(capabilities) {
     const ctx = document.getElementById('histogramChart').getContext('2d');
     const histData = createHistogramData(capabilities);
-    const labels = ['0%', '10%', '20%', '30%', '40%', '50%', '60%', '70%', '80%', '90%'];
+    const labels = [
+        '0%', '10%', '20%', '30%', '40%',
+        '50%', '60%', '70%', '80%', '90%', '100%'
+    ];
 
     // Destroy existing chart to force complete rebuild
     if (histogramChart) {
@@ -225,13 +229,15 @@ function updateHistogramChart(capabilities) {
             scales: {
                 x: {
                     grid: {
-                        color: 'rgba(148, 163, 184, 0.1)'
+                        color: 'rgba(148, 163, 184, 0.1)',
+                        offset: false
                     },
                     ticks: {
                         color: '#94a3b8',
                         font: {
                             family: 'Space Mono'
-                        }
+                        },
+                        align: 'center'
                     }
                 },
                 y: {
