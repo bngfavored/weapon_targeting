@@ -234,6 +234,52 @@ function updateHistogramChart(capabilities) {
 // === Event Listeners ===
 
 document.addEventListener('DOMContentLoaded', function() {
+    // Initialize theme (default to dark)
+    document.documentElement.setAttribute('data-theme', 'dark');
+    document.documentElement.setAttribute('data-font-size', 'medium');
+
+    // Settings dropdown toggle
+    const settingsBtn = document.getElementById('settingsBtn');
+    const settingsDropdown = document.getElementById('settingsDropdown');
+
+    settingsBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        settingsDropdown.classList.toggle('active');
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!settingsDropdown.contains(e.target) && !settingsBtn.contains(e.target)) {
+            settingsDropdown.classList.remove('active');
+        }
+    });
+
+    // Theme toggle
+    const themeToggle = document.getElementById('themeToggle');
+    const themeToggleSlider = themeToggle.querySelector('.theme-toggle-slider');
+
+    themeToggle.addEventListener('click', function() {
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        if (isDark) {
+            document.documentElement.setAttribute('data-theme', 'light');
+            themeToggle.classList.remove('active');
+            themeToggleSlider.textContent = '☀️';
+        } else {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            themeToggle.classList.add('active');
+            themeToggleSlider.textContent = '🌙';
+        }
+    });
+
+    // Font size toggle
+    document.querySelectorAll('.font-size-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.font-size-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            document.documentElement.setAttribute('data-font-size', this.dataset.size);
+        });
+    });
+
     // Load trial data
     loadTrialData();
 
