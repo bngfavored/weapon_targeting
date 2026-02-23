@@ -116,9 +116,9 @@ function createHistogramData(capabilities) {
         bins[binIndex]++;
     }
 
-    // Group into 11 display bins (0-10%, 10-20%, ..., 90-100%) by summing every 10 bins
+    // Group into 10 display bins (0-10%, 10-20%, ..., 90-100%) by summing every 10 bins
     const displayBins = [];
-    for (let i = 0; i < 11; i++) {
+    for (let i = 0; i < 10; i++) {
         let sum = 0;
         for (let j = 0; j < 10; j++) {
             sum += bins[i * 10 + j];
@@ -201,10 +201,12 @@ function updateGaugeChart(successPercent) {
 function updateHistogramChart(capabilities) {
     const ctx = document.getElementById('histogramChart').getContext('2d');
     const histData = createHistogramData(capabilities);
-    const labels = [
-        '0%', '10%', '20%', '30%', '40%',
-        '50%', '60%', '70%', '80%', '90%', '100%'
-    ];
+
+    // Convert to data points with x positions (bar centers at 5, 15, 25, etc.)
+    const barData = histData.map((value, index) => ({
+        x: index * 10 + 5,
+        y: value
+    }));
 
     // Destroy existing chart to force complete rebuild
     if (histogramChart) {
@@ -215,29 +217,48 @@ function updateHistogramChart(capabilities) {
     histogramChart = new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: labels,
             datasets: [{
                 label: 'Frequency',
-                data: histData,
+                data: barData,
                 backgroundColor: '#60a5fa',
-                borderRadius: 2
+                borderRadius: 0,
+                barPercentage: 1.0,
+                categoryPercentage: 1.0,
+                barThickness: 'flex',
+                maxBarThickness: 100
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            layout: {
+                padding: {
+                    left: 0
+                }
+            },
             scales: {
                 x: {
+                    type: 'linear',
+                    min: 0,
+                    max: 100,
+                    offset: false,
+                    bounds: 'ticks',
+                    grace: 0,
                     grid: {
                         color: 'rgba(148, 163, 184, 0.1)',
-                        offset: true
+                        offset: false,
+                        drawTicks: true
                     },
                     ticks: {
                         color: '#94a3b8',
                         font: {
                             family: 'Space Mono'
                         },
-                        align: 'start'
+                        stepSize: 10,
+                        padding: 0,
+                        callback: function(value) {
+                            return value + '%';
+                        }
                     }
                 },
                 y: {
@@ -262,8 +283,14 @@ function updateHistogramChart(capabilities) {
                 },
                 tooltip: {
                     callbacks: {
+                        title: function(context) {
+                            const x = context[0].parsed.x;
+                            const start = x - 5;
+                            const end = x + 5;
+                            return `${start}% - ${end}%`;
+                        },
                         label: function(context) {
-                            return context.raw.toFixed(1) + '% of trials';
+                            return context.raw.y.toFixed(1) + '% of trials';
                         }
                     }
                 }
