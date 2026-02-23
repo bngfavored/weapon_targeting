@@ -314,10 +314,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Font size toggle
     document.querySelectorAll('.font-size-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const newSize = this.dataset.size;
+            console.log('Font size button clicked:', newSize);
             document.querySelectorAll('.font-size-btn').forEach(b => b.classList.remove('active'));
             this.classList.add('active');
-            document.documentElement.setAttribute('data-font-size', this.dataset.size);
+            document.documentElement.setAttribute('data-font-size', newSize);
+            console.log('HTML font-size attribute:', document.documentElement.getAttribute('data-font-size'));
+            console.log('Computed font-size:', window.getComputedStyle(document.documentElement).fontSize);
         });
     });
 

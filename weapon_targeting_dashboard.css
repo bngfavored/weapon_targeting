@@ -53,17 +53,38 @@ html {
     font-size: 16px;
 }
 
-/* Font Size Options */
-html[data-font-size="small"] {
-    font-size: 14px;
+/* Font Size Options - Using scale for consistent sizing */
+body {
+    transform-origin: top left;
+    transition: transform 0.2s ease;
 }
 
-html[data-font-size="medium"] {
-    font-size: 16px;
+html[data-font-size="small"] body {
+    transform: scale(0.875);
+    width: calc(100% / 0.875);
+    height: calc(100% / 0.875);
 }
 
-html[data-font-size="large"] {
-    font-size: 18px;
+html[data-font-size="medium"] body {
+    transform: scale(1);
+}
+
+html[data-font-size="large"] body {
+    transform: scale(1.125);
+    width: calc(100% / 1.125);
+    height: calc(100% / 1.125);
+}
+
+html[data-font-size="xlarge"] body {
+    transform: scale(1.25);
+    width: calc(100% / 1.25);
+    height: calc(100% / 1.25);
+}
+
+html[data-font-size="xxlarge"] body {
+    transform: scale(1.375);
+    width: calc(100% / 1.375);
+    height: calc(100% / 1.375);
 }
 
 body {
@@ -112,7 +133,7 @@ body {
     padding: 8px 12px;
     color: var(--text-primary);
     font-family: inherit;
-    font-size: 13px;
+    font-size: 0.8125rem;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -172,7 +193,7 @@ body {
 }
 
 .settings-section-title {
-    font-size: 11px;
+    font-size: 0.6875rem;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.8px;
@@ -191,7 +212,7 @@ body {
 }
 
 .theme-toggle-label {
-    font-size: 13px;
+    font-size: 0.8125rem;
     color: var(--text-secondary);
 }
 
@@ -241,13 +262,13 @@ body {
 
 .font-size-btn {
     flex: 1;
-    padding: 8px 12px;
+    padding: 8px 6px;
     background: transparent;
     border: none;
     border-radius: calc(var(--radius-sm) - 2px);
     color: var(--text-secondary);
     font-family: inherit;
-    font-size: 11px;
+    font-size: 0.6875rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -287,7 +308,7 @@ body {
 }
 
 .control-label {
-    font-size: 11px;
+    font-size: 0.6875rem;
     font-weight: 600;
     color: var(--text-secondary);
     text-transform: uppercase;
@@ -301,7 +322,7 @@ body {
     border-radius: var(--radius-sm);
     color: var(--text-primary);
     font-family: 'Space Mono', monospace;
-    font-size: 12px;
+    font-size: 0.75rem;
     width: 60px;
     text-align: center;
 }
@@ -318,7 +339,7 @@ body {
     border-radius: var(--radius-sm);
     color: var(--text-primary);
     font-family: inherit;
-    font-size: 12px;
+    font-size: 0.75rem;
     cursor: pointer;
 }
 
@@ -340,7 +361,7 @@ body {
     border-radius: calc(var(--radius-sm) - 2px);
     color: var(--text-secondary);
     font-family: inherit;
-    font-size: 10px;
+    font-size: 0.625rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -384,7 +405,7 @@ body {
 }
 
 .card-title {
-    font-size: 11px;
+    font-size: 0.6875rem;
     font-weight: 600;
     color: var(--accent-green);
     text-transform: uppercase;
@@ -412,7 +433,7 @@ body {
 }
 
 .stat-label {
-    font-size: 10px;
+    font-size: 0.625rem;
     color: var(--text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -421,7 +442,7 @@ body {
 
 .stat-value {
     font-family: 'Space Mono', monospace;
-    font-size: 28px;
+    font-size: 1.75rem;
     font-weight: 700;
     color: var(--accent-green);
 }
@@ -438,7 +459,7 @@ body {
     transition: all 0.2s ease;
     border: 1px solid var(--border-color);
     font-family: 'DM Sans', sans-serif;
-    font-size: 13px;
+    font-size: 0.8125rem;
     font-weight: 500;
     color: var(--text-secondary);
     width: 100%;
@@ -467,7 +488,7 @@ body {
 
 .weapon-effectiveness {
     font-family: 'Space Mono', monospace;
-    font-size: 11px;
+    font-size: 0.6875rem;
     color: var(--text-secondary);
 }
 
@@ -569,7 +590,7 @@ body {
 
 .gauge-pointer-value {
     font-family: 'Space Mono', monospace;
-    font-size: 14px;
+    font-size: 0.875rem;
     font-weight: 700;
     line-height: 1.2;
 }
