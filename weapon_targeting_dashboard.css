@@ -445,7 +445,7 @@ body {
 .weapon-btn {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
     gap: 10px;
     padding: 10px 12px;
     background: var(--bg-secondary);
@@ -458,7 +458,7 @@ body {
     font-weight: 500;
     color: var(--text-secondary);
     width: 100%;
-    text-align: left;
+    text-align: center;
 }
 
 .weapon-btn:hover {
@@ -478,7 +478,7 @@ body {
 }
 
 .weapon-label {
-    flex: 1;
+    text-align: center;
 }
 
 .weapon-effectiveness {

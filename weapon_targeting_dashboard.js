@@ -170,7 +170,7 @@ function updateDashboard() {
         const effEl = document.getElementById(`eff${w}`);
         const idx = (w - 1) * 2 + (selectedTarget - 1);
         const eff = averages[idx];
-        effEl.textContent = '(' + (eff * 100).toFixed(1) + '%)';
+        effEl.textContent = '';
     }
 
     // Update gauge
