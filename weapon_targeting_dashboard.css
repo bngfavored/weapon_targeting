@@ -298,8 +298,15 @@ body {
     gap: 8px;
 }
 
-.control-group:nth-child(2) {
+.control-group.stacked {
     padding: 0 20px;
+}
+
+.control-row {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-start;
 }
 
 .control-label {
@@ -718,6 +725,36 @@ body {
         padding: 5px;
     }
 
+    .controls-bar {
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .controls-bar .control-group:nth-child(1),
+    .controls-bar .control-group:nth-child(2) {
+        flex: 1;
+        min-width: 100px;
+    }
+
+    .controls-bar .control-group:nth-child(3) {
+        margin-left: auto;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .controls-bar .control-group:nth-child(3) .engine-toggle {
+        flex: 1;
+        margin-left: 0;
+    }
+
+    .controls-bar .control-group:nth-child(3) .help-btn {
+        flex-shrink: 0;
+        margin-left: 8px;
+    }
     .header {
         margin-bottom: 5px;
         padding-bottom: 6px;
@@ -1238,28 +1275,30 @@ body {
 }
 
   
-/* Help Button */  
-.help-btn {  
-    position: absolute;  
-    left: 50%;  
-    transform: translateX(-50%);  
-    background: var(--bg-card);  
-    border: 1px solid var(--border-color);  
-    border-radius: var(--radius-sm);  
-    padding: 8px 20px;  
-    display: flex;  
-    align-items: center;  
-    justify-content: center;  
-    color: var(--text-primary);  
-    text-decoration: none;  
-    font-family: 'DM Sans', sans-serif;  
-    font-size: 14px;  
-    font-weight: 600;  
-    cursor: pointer;  
-    transition: all 0.2s ease;  
- }  
- .help-btn:hover {  
-    background: var(--bg-card-hover);  
-    border-color: var(--border-color-hover);  
-    transform: translateX(-50%) scale(1.02);  
-} 
+/* Help Button */
+.help-btn {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: 6px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-primary);
+    text-decoration: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.help-btn:hover {
+    background: var(--bg-card-hover);
+    border-color: var(--border-color-hover);
+    transform: scale(1.02);
+}
+
+.control-group .help-btn {
+    margin-left: 8px;
+}
