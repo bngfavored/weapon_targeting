@@ -49,42 +49,37 @@
     box-sizing: border-box;
 }
 
+/* Font Size Options - applies to all elements with !important */
+:root {
+    --font-size-small: 14px;
+    --font-size-medium: 16px;
+    --font-size-large: 18px;
+    --font-size-xlarge: 20px;
+    --font-size-xxlarge: 24px;
+}
+
 html {
     font-size: 16px;
 }
 
-/* Font Size Options - Using scale for consistent sizing */
-body {
-    transform-origin: top left;
-    transition: transform 0.2s ease;
+html[data-font-size="small"] * {
+    font-size: var(--font-size-small) !important;
 }
 
-html[data-font-size="small"] body {
-    transform: scale(0.875);
-    width: calc(100% / 0.875);
-    height: calc(100% / 0.875);
+html[data-font-size="medium"] * {
+    font-size: var(--font-size-medium) !important;
 }
 
-html[data-font-size="medium"] body {
-    transform: scale(1);
+html[data-font-size="large"] * {
+    font-size: var(--font-size-large) !important;
 }
 
-html[data-font-size="large"] body {
-    transform: scale(1.125);
-    width: calc(100% / 1.125);
-    height: calc(100% / 1.125);
+html[data-font-size="xlarge"] * {
+    font-size: var(--font-size-xlarge) !important;
 }
 
-html[data-font-size="xlarge"] body {
-    transform: scale(1.25);
-    width: calc(100% / 1.25);
-    height: calc(100% / 1.25);
-}
-
-html[data-font-size="xxlarge"] body {
-    transform: scale(1.375);
-    width: calc(100% / 1.375);
-    height: calc(100% / 1.375);
+html[data-font-size="xxlarge"] * {
+    font-size: var(--font-size-xxlarge) !important;
 }
 
 body {

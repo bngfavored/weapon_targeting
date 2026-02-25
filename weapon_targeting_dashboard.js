@@ -345,12 +345,12 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
             e.stopPropagation();
             const newSize = this.dataset.size;
-            console.log('Font size button clicked:', newSize);
+            
+            // Set data-font-size on html element to trigger CSS !important rules
+            document.documentElement.setAttribute('data-font-size', newSize);
+            
             document.querySelectorAll('.font-size-btn').forEach(b => b.classList.remove('active'));
             this.classList.add('active');
-            document.documentElement.setAttribute('data-font-size', newSize);
-            console.log('HTML font-size attribute:', document.documentElement.getAttribute('data-font-size'));
-            console.log('Computed font-size:', window.getComputedStyle(document.documentElement).fontSize);
         });
     });
 
