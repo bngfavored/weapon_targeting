@@ -1,3 +1,21 @@
+// === Modal Content Definitions ===
+const modalContent = {
+    thresholdModal: {
+        title: 'Success Threshold',
+        content: `
+            <p>Each element of the SIP represents the remaining combat effectiveness of the target in a single simulated trial. Mission success is defined relative to an attacker-specified effectiveness threshold. The chance of mission success is calculated as the proportion of simulated trials in which remaining combat effectiveness is less than or equal to that threshold.</p>
+            <p><em>For example, if mission success requires reducing the target to 30 percent combat effectiveness or lower, the probability of success is the fraction of trials in which the simulated remaining effectiveness is 30 percent or below.</em></p>
+        `
+    },
+    effectivenessModal: {
+        title: 'Expected Effectiveness',
+        content: `
+            <p>Combat effectiveness is a constructed metric representing the target's combat capability relative to an initial baseline of 100 percent. A value of 100 percent indicates full operational capability, while lower values reflect degradation resulting from engagement.</p>
+            <p><em>From the attacker's perspective, lower remaining combat effectiveness corresponds to greater mission success; conversely, higher values indicate greater residual capability for the target.</em></p>
+        `
+    }
+};
+
 // === Trial Data (loaded from Excel) ===
 // Format: [W_1_T_1, W_1_T_2, W_2_T_1, W_2_T_2, W_3_T_1, W_3_T_2, W_4_T_1, W_4_T_2]
 // Index: [0: W1T1, 1: W1T2, 2: W2T1, 3: W2T2, 4: W3T1, 5: W3T2, 6: W4T1, 7: W4T2]
@@ -304,7 +322,13 @@ function updateHistogramChart(capabilities) {
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize theme (default to light)
     document.documentElement.setAttribute('data-theme', 'light');
-    document.documentElement.setAttribute('data-font-size', 'medium');
+
+    // Default to small font on phones, medium otherwise
+    const defaultFontSize = window.innerWidth <= 450 ? 'small' : 'medium';
+    document.documentElement.setAttribute('data-font-size', defaultFontSize);
+    document.querySelectorAll('.font-size-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.size === defaultFontSize);
+    });
 
     // Settings dropdown toggle
     const settingsBtn = document.getElementById('settingsBtn');
@@ -397,5 +421,41 @@ document.addEventListener('DOMContentLoaded', function() {
             stochasticMode = this.dataset.engine === 'stochastic';
             updateDashboard();
         });
+    });
+
+    // === Modal Event Handlers ===
+    const modalOverlay = document.getElementById('modalOverlay');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalContentEl = document.getElementById('modalContent');
+    const modalCloseBtn = document.getElementById('modalCloseBtn');
+
+    // Info button click handlers
+    document.querySelectorAll('.info-btn[data-modal]').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const modalId = this.dataset.modal;
+            if (modalContent[modalId]) {
+                modalTitle.textContent = modalContent[modalId].title;
+                modalContentEl.innerHTML = modalContent[modalId].content;
+                modalOverlay.classList.add('active');
+            }
+        });
+    });
+
+    // Close modal handlers
+    modalCloseBtn.addEventListener('click', () => {
+        modalOverlay.classList.remove('active');
+    });
+
+    modalOverlay.addEventListener('click', (e) => {
+        if (e.target === modalOverlay) {
+            modalOverlay.classList.remove('active');
+        }
+    });
+
+    // Close modal on Escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modalOverlay.classList.contains('active')) {
+            modalOverlay.classList.remove('active');
+        }
     });
 });

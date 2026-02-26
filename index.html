@@ -54,7 +54,10 @@
         <div class="controls-bar">
             <div class="control-group">
                 <span class="control-label">Success Threshold</span>
-                <input type="text" class="control-input" id="thresholdInput" value="50%">
+                <div class="control-input-wrapper">
+                    <input type="text" class="control-input" id="thresholdInput" value="50%">
+                    <button class="info-btn" data-modal="thresholdModal" title="What is the threshold?">?</button>
+                </div>
             </div>
             <div class="control-group">
                 <span class="control-label">Target</span>
@@ -87,7 +90,10 @@
                         </div>
 
                         <div class="stat-display">
-                            <div class="stat-label">Average Remaining<br>Combat Effectiveness</div>
+                            <div class="stat-label-wrapper">
+                                <button class="info-btn stat-info-btn" data-modal="effectivenessModal" title="What does this metric mean?">?</button>
+                                <div class="stat-label">Average Remaining<br>Combat Effectiveness</div>
+                            </div>
                             <div class="stat-value" id="avgEffectiveness">27%</div>
                         </div>
 
@@ -157,6 +163,19 @@
                 <div class="chart-container">
                     <canvas id="histogramChart"></canvas>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Overlay -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">Title</h3>
+                <button class="modal-close-btn" id="modalCloseBtn">&times;</button>
+            </div>
+            <div class="modal-content" id="modalContent">
+                <!-- Content injected dynamically -->
             </div>
         </div>
     </div>
