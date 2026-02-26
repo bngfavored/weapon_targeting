@@ -149,6 +149,50 @@ function createHistogramData(capabilities) {
     return displayBins.map(count => (count / total) * 100);
 }
 
+// === View Toggle State ===
+let activeView = 'histogram'; // 'histogram' or 'effectiveness'
+
+function updateEffectivenessTable() {
+    const tbody = document.getElementById('effectivenessTableBody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+
+    // Normalize color scale across all 8 values
+    const minVal = Math.min(...averages);
+    const maxVal = Math.max(...averages);
+    const range = maxVal - minVal || 1;
+
+    function heatColor(value) {
+        const norm = (value - minVal) / range; // 0=min(red), 1=max(green)
+        // Excel-style red → yellow → green
+        let r, g, b;
+        if (norm <= 0.5) {
+            const t = norm * 2;
+            r = Math.round(248 + (255 - 248) * t);
+            g = Math.round(105 + (235 - 105) * t);
+            b = Math.round(107 + (132 - 107) * t);
+        } else {
+            const t = (norm - 0.5) * 2;
+            r = Math.round(255 + (99  - 255) * t);
+            g = Math.round(235 + (190 - 235) * t);
+            b = Math.round(132 + (123 - 132) * t);
+        }
+        return `rgb(${r},${g},${b})`;
+    }
+
+    for (let w = 1; w <= 4; w++) {
+        const t1idx = (w - 1) * 2 + 0;
+        const t2idx = (w - 1) * 2 + 1;
+        const t1val = averages[t1idx];
+        const t2val = averages[t2idx];
+        const row = document.createElement('tr');
+        row.innerHTML = `<td>Weapon ${w}</td>` +
+            `<td style="background:${heatColor(t1val)};color:#1a1a1a">${(t1val * 100).toFixed(1)}%</td>` +
+            `<td style="background:${heatColor(t2val)};color:#1a1a1a">${(t2val * 100).toFixed(1)}%</td>`;
+        tbody.appendChild(row);
+    }
+}
+
 // === UI Update Functions ===
 
 function updateDashboard() {
@@ -420,6 +464,28 @@ document.addEventListener('DOMContentLoaded', function() {
             // Update stochastic mode
             stochasticMode = this.dataset.engine === 'stochastic';
             updateDashboard();
+        });
+    });
+
+    // View toggle (Histogram / Combat Effectiveness)
+    document.querySelectorAll('.view-toggle-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.view-toggle-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            activeView = this.dataset.view;
+            const histView = document.getElementById('histogramView');
+            const effView = document.getElementById('effectivenessView');
+            const cardTitle = document.querySelector('.histogram-section .card-title');
+            if (activeView === 'histogram') {
+                histView.style.display = '';
+                effView.style.display = 'none';
+                if (cardTitle) cardTitle.textContent = 'Remaining Combat Effectiveness';
+            } else {
+                histView.style.display = 'none';
+                effView.style.display = 'block';
+                if (cardTitle) cardTitle.textContent = 'Expected Remaining Combat Effectiveness';
+                updateEffectivenessTable();
+            }
         });
     });
 

@@ -157,11 +157,27 @@
 
             <!-- Histogram -->
             <div class="card histogram-section">
+                <div class="view-toggle">
+                    <button type="button" class="view-toggle-btn active" data-view="histogram">Histogram</button>
+                    <button type="button" class="view-toggle-btn" data-view="effectiveness">Combat Effectiveness</button>
+                </div>
                 <div class="card-header">
                     <span class="card-title">Remaining Combat Effectiveness</span>
                 </div>
-                <div class="chart-container">
+                <div class="chart-container" id="histogramView">
                     <canvas id="histogramChart"></canvas>
+                </div>
+                <div class="effectiveness-table-container" id="effectivenessView">
+                    <table class="effectiveness-table">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th>Target 1</th>
+                                <th>Target 2</th>
+                            </tr>
+                        </thead>
+                        <tbody id="effectivenessTableBody"></tbody>
+                    </table>
                 </div>
             </div>
         </div>
