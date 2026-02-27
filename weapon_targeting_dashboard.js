@@ -10,8 +10,7 @@ const modalContent = {
     effectivenessModal: {
         title: 'Expected Remaining Combat Effectiveness',
         content: `
-            <p>Combat effectiveness is a constructed metric representing the target's combat capability relative to an initial baseline of 100 percent. A value of 100 percent indicates full operational capability, while lower values reflect degradation resulting from engagement.</p>
-            <p><em>From the attacker's perspective, lower remaining combat effectiveness corresponds to greater mission success; conversely, higher values indicate greater residual capability for the target.</em></p>
+            <p>A constructed metric representing the target's expected (average) post-strike capability relative to baseline. 100% indicates full operational capability; lower values reflect greater degradation. From the attacker's perspective, lower remaining effectiveness means greater mission success.</p>
         `
     }
 };
@@ -163,8 +162,8 @@ function updateEffectivenessTable() {
     const range = maxVal - minVal || 1;
 
     function heatColor(value) {
-        const norm = (value - minVal) / range; // 0=min(red), 1=max(green)
-        // Excel-style red → yellow → green
+        const norm = 1 - (value - minVal) / range; // 0=min(green), 1=max(red)
+        // Excel-style green → yellow → red (low is good)
         let r, g, b;
         if (norm <= 0.5) {
             const t = norm * 2;
