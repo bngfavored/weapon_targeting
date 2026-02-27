@@ -1058,17 +1058,19 @@ body {
     }
 
     .stat-display {
-        padding: 6px;
-        margin-bottom: 6px;
+        padding: 3px;
+        margin-bottom: 4px;
         overflow: hidden;
     }
 
     .stat-label-wrapper {
         gap: 0;
+        margin-bottom: 0;
     }
 
     .stat-label {
         font-size: 8px;
+        margin-bottom: 0;
     }
 
     .stat-value {
@@ -1574,6 +1576,7 @@ body {
 .effectiveness-table-container {
     display: none;
     flex: 1;
+    min-height: 200px;
 }
 
 .effectiveness-table {
@@ -1626,6 +1629,10 @@ body {
     .view-toggle-btn {
         font-size: 9px;
         padding: 5px 6px;
+    }
+
+    .effectiveness-table-container {
+        min-height: 140px;
     }
 
     .effectiveness-table th,

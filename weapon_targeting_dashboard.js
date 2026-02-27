@@ -306,6 +306,16 @@ function updateHistogramChart(capabilities) {
                     offset: false,
                     bounds: 'ticks',
                     grace: 0,
+                    title: {
+                        display: true,
+                        text: 'Remaining Combat Effectiveness (%)',
+                        color: '#94a3b8',
+                        font: {
+                            family: 'DM Sans',
+                            size: 14
+                        },
+                        padding: { top: 4 }
+                    },
                     grid: {
                         color: 'rgba(148, 163, 184, 0.1)',
                         offset: false,
@@ -324,6 +334,16 @@ function updateHistogramChart(capabilities) {
                     }
                 },
                 y: {
+                    title: {
+                        display: true,
+                        text: 'Chance',
+                        color: '#94a3b8',
+                        font: {
+                            family: 'DM Sans',
+                            size: 14
+                        },
+                        padding: { bottom: 4 }
+                    },
                     grid: {
                         color: 'rgba(148, 163, 184, 0.1)'
                     },
@@ -479,7 +499,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (activeView === 'histogram') {
                 histView.style.display = '';
                 effView.style.display = 'none';
-                if (cardTitle) cardTitle.textContent = 'Remaining Combat Effectiveness';
+                if (cardTitle) cardTitle.textContent = 'Histogram of Effectiveness';
             } else {
                 histView.style.display = 'none';
                 effView.style.display = 'block';
