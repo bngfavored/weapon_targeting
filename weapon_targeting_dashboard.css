@@ -114,14 +114,8 @@
 }
 
 .modal-content em {
-    color: var(--text-secondary);
+    color: inherit;
     font-style: italic;
-    display: block;
-    padding: 8px 10px;
-    background: var(--bg-secondary);
-    border-radius: var(--radius-sm);
-    margin: 10px 0;
-    border-left: 2px solid var(--accent-blue);
 }
 :root {
     /* Light Theme (default) - Blue Hue from Logo */
@@ -814,6 +808,8 @@ body {
 .chart-container {
     flex: 1;
     min-height: 200px;
+    overflow: visible;
+    padding-bottom: 4px;
 }
 
 /* ========== LANDSCAPE PHONE (max-height: 500px) ========== */
@@ -970,6 +966,10 @@ body {
         padding: 12px;
     }
 
+    .main-grid {
+        gap: 3px;
+    }
+
     .card {
         padding: 8px;
     }
@@ -977,6 +977,7 @@ body {
     .controls-bar {
         padding: 8px;
         gap: 10px;
+        margin-bottom: 3px;
     }
 
     .control-group:nth-child(2) {
@@ -1042,6 +1043,7 @@ body {
 
     .combined-card {
         padding: 4px;
+        margin-bottom: 0;
     }
 
     .combined-content {
@@ -1124,7 +1126,8 @@ body {
     }
 
     .chart-container {
-        min-height: 180px;
+        min-height: 140px;
+        padding-bottom: 12px;
     }
 }
 
@@ -1145,6 +1148,7 @@ body {
 
     .combined-card {
         padding: 4px;
+        margin-bottom: 0;
     }
 
     .combined-content {
@@ -1240,6 +1244,7 @@ body {
 
     .combined-card {
         padding: 3px;
+        margin-bottom: 0;
     }
 
     .combined-content {

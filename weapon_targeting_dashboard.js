@@ -4,11 +4,11 @@ const modalContent = {
         title: 'Success Threshold',
         content: `
             <p>Each element of the SIP represents the remaining combat effectiveness of the target in a single simulated trial. Mission success is defined relative to an attacker-specified effectiveness threshold. The chance of mission success is calculated as the proportion of simulated trials in which remaining combat effectiveness is less than or equal to that threshold.</p>
-            <p><em>For example, if mission success requires reducing the target to 30 percent combat effectiveness or lower, the probability of success is the fraction of trials in which the simulated remaining effectiveness is 30 percent or below.</em></p>
+            <p>For example, if mission success requires reducing the target to 30 percent combat effectiveness or lower, the chance of success is the fraction of trials in which the simulated remaining effectiveness is 30 percent or below.</p>
         `
     },
     effectivenessModal: {
-        title: 'Expected Effectiveness',
+        title: 'Expected Remaining Combat Effectiveness',
         content: `
             <p>Combat effectiveness is a constructed metric representing the target's combat capability relative to an initial baseline of 100 percent. A value of 100 percent indicates full operational capability, while lower values reflect degradation resulting from engagement.</p>
             <p><em>From the attacker's perspective, lower remaining combat effectiveness corresponds to greater mission success; conversely, higher values indicate greater residual capability for the target.</em></p>
@@ -25,7 +25,7 @@ const averages = [0.687005, 0.553479, 0.503667, 0.503667, 0.5038, 0.5038, 0.5519
 // === Global State ===
 let weaponSelections = [true, false, false, false]; // Default: W1 selected
 let selectedTarget = 1; // 1 or 2
-let effectivenessThreshold = 0.5; // 50%
+let effectivenessThreshold = 0.3; // 30%
 let stochasticMode = false;
 const maxTrials = 10000;
 
