@@ -795,6 +795,10 @@ body {
     color: var(--accent-green);
 }
 
+.gauge-pointer-left .gauge-pointer-label {
+    color: var(--accent-green);
+}
+
 .gauge-pointer-right .gauge-pointer-value {
     color: var(--accent-red);
 }
@@ -944,12 +948,12 @@ body {
         margin-left: 8px;
     }
     .header {
-        margin-bottom: 5px;
-        padding-bottom: 6px;
+        margin-bottom: 4px;
+        padding-bottom: 4px;
     }
 
     .logo img {
-        height: 57px !important;
+        height: 43px !important;
     }
 
     .settings-btn {
@@ -998,6 +1002,24 @@ body {
         width: 55px;
     }
 
+    .controls-bar .control-group:nth-child(1) .control-label {
+        font-size: 8px;
+    }
+
+    .controls-bar .control-group:nth-child(1) .control-input {
+        font-size: 9px;
+        padding: 4px 6px;
+        width: 44px;
+    }
+
+    .controls-bar .control-group:nth-child(1) .info-btn {
+        width: 16px;
+        height: 16px;
+        min-width: 16px;
+        min-height: 16px;
+        font-size: 9px;
+    }
+
     .control-select {
         padding: 5px 8px;
         font-size: 11px;
@@ -1044,7 +1066,6 @@ body {
     .combined-card {
         padding: 4px;
         margin-bottom: 0;
-        overflow: hidden;
     }
 
     .combined-content {
@@ -1054,45 +1075,52 @@ body {
 
     .weapon-section {
         flex: 0 0 auto;
-        min-width: 165px;
-        max-width: 165px;
+        min-width: 149px;
+        max-width: 149px;
+        position: relative;
+        z-index: 1;
     }
 
     .stat-display {
         padding: 6px;
         margin-bottom: 4px;
-        overflow: hidden;
         text-align: left;
     }
 
     .stat-label-wrapper {
-        gap: 4px;
+        gap: 10px;
         margin-bottom: 0;
+        width: 100%;
     }
 
     .stat-info-btn {
-        order: 1;
         margin-left: auto;
+        width: 16px;
+        height: 16px;
+        min-width: 16px;
+        min-height: 16px;
+        font-size: 10px;
     }
 
     .stat-label {
-        font-size: 8px;
+        font-size: 7px;
         margin-bottom: 0;
+        white-space: nowrap;
     }
 
     .stat-value {
-        font-size: 16px;
+        font-size: 14px;
         text-align: center;
     }
 
     .weapon-btn {
         padding: 4px 6px;
         gap: 4px;
-        font-size: 10px;
+        font-size: 9px;
     }
 
     .weapon-effectiveness {
-        font-size: 8px;
+        font-size: 7px;
     }
 
     .gauge-section {
@@ -1112,23 +1140,23 @@ body {
 
     .gauge-wrapper {
         width: 100%;
-        max-width: 230px;
+        max-width: 207px;
         max-height: 100%;
         height: auto;
         aspect-ratio: 1;
     }
 
     .gauge-center img {
-        width: 143px;
-        height: 143px;
+        width: 129px;
+        height: 129px;
     }
 
     .gauge-pointer-value {
-        font-size: 11px;
+        font-size: 10px;
     }
 
     .gauge-pointer-label {
-        font-size: 7px;
+        font-size: 6px;
     }
 
     .gauge-pointer-container {
