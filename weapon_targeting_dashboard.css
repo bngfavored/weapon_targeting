@@ -1044,6 +1044,7 @@ body {
     .combined-card {
         padding: 4px;
         margin-bottom: 0;
+        overflow: hidden;
     }
 
     .combined-content {
@@ -1067,6 +1068,11 @@ body {
     .stat-label-wrapper {
         gap: 4px;
         margin-bottom: 0;
+    }
+
+    .stat-info-btn {
+        order: 1;
+        margin-left: auto;
     }
 
     .stat-label {
@@ -1107,6 +1113,7 @@ body {
     .gauge-wrapper {
         width: 100%;
         max-width: 230px;
+        max-height: 100%;
         height: auto;
         aspect-ratio: 1;
     }
