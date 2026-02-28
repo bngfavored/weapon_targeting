@@ -1,1 +1,5 @@
 .venv
+unneeded/*
+.claude/*
+CLAUDE.md
+*.zip
