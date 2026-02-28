@@ -1058,13 +1058,14 @@ body {
     }
 
     .stat-display {
-        padding: 3px;
+        padding: 6px;
         margin-bottom: 4px;
         overflow: hidden;
+        text-align: left;
     }
 
     .stat-label-wrapper {
-        gap: 0;
+        gap: 4px;
         margin-bottom: 0;
     }
 
@@ -1075,6 +1076,7 @@ body {
 
     .stat-value {
         font-size: 16px;
+        text-align: center;
     }
 
     .weapon-btn {

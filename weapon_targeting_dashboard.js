@@ -502,7 +502,7 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 histView.style.display = 'none';
                 effView.style.display = 'block';
-                if (cardTitle) cardTitle.textContent = 'Expected Remaining Combat Effectiveness';
+                if (cardTitle) cardTitle.textContent = 'ERC Effectiveness';
                 updateEffectivenessTable();
             }
         });
